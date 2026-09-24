@@ -1,0 +1,4 @@
+# local Python virtual env (run.sh / run.cmd use it when it exists)
+.venv/
+# local database credentials (see db_config.example.json)
+src/1.1 - sql-UI/db_config.json

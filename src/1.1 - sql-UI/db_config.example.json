@@ -1,0 +1,8 @@
+{
+  "host": "localhost",
+  "port": 55555,
+  "dbname": "hotel_manegmant",
+  "user": "postgres",
+  "password": "159633",
+  "_comment": "Copy this file to db_config.json (next to main.py) and edit it - db_config.json is gitignored so your real password never gets committed."
+}
