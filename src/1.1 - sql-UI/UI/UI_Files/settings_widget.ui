@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1100</width>
+    <height>740</height>
+   </rect>
+  </property>
+  <layout class="QVBoxLayout" name="page_layout">
+   <property name="spacing">
+    <number>20</number>
+   </property>
+   <property name="leftMargin">
+    <number>32</number>
+   </property>
+   <property name="topMargin">
+    <number>28</number>
+   </property>
+   <property name="rightMargin">
+    <number>32</number>
+   </property>
+   <property name="bottomMargin">
+    <number>32</number>
+   </property>
+   <item>
+    <widget class="QFrame" name="account_card">
+     <property name="card" stdset="0">
+      <string>true</string>
+     </property>
+     <layout class="QHBoxLayout" name="account_layout">
+      <property name="spacing">
+       <number>18</number>
+      </property>
+      <property name="leftMargin">
+       <number>28</number>
+      </property>
+      <property name="topMargin">
+       <number>28</number>
+      </property>
+      <property name="rightMargin">
+       <number>28</number>
+      </property>
+      <property name="bottomMargin">
+       <number>28</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="avatar_label">
+        <property name="text">
+         <string>U</string>
+        </property>
+        <property name="role" stdset="0">
+         <string>avatar</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>64</width>
+          <height>64</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>64</width>
+          <height>64</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="account_text_layout">
+        <property name="spacing">
+         <number>2</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="user_name_label">
+          <property name="text">
+           <string>User</string>
+          </property>
+          <property name="role" stdset="0">
+           <string>h1</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="user_role_label">
+          <property name="text">
+           <string>Front desk</string>
+          </property>
+          <property name="role" stdset="0">
+           <string>muted</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <spacer name="spacer_1">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="logout_btn">
+        <property name="text">
+         <string>  Log out</string>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
+        <property name="variant" stdset="0">
+         <string>danger</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="details_card">
+     <property name="card" stdset="0">
+      <string>true</string>
+     </property>
+     <layout class="QVBoxLayout" name="details_layout">
+      <property name="spacing">
+       <number>8</number>
+      </property>
+      <property name="leftMargin">
+       <number>28</number>
+      </property>
+      <property name="topMargin">
+       <number>28</number>
+      </property>
+      <property name="rightMargin">
+       <number>28</number>
+      </property>
+      <property name="bottomMargin">
+       <number>28</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="details_heading">
+        <property name="text">
+         <string>Account details</string>
+        </property>
+        <property name="role" stdset="0">
+         <string>h2</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="spacer_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>6</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <layout class="QGridLayout" name="details_grid"><property name="horizontalSpacing"><number>80</number></property>
+        <property name="spacing">
+         <number>22</number>
+        </property>
+        <item row="0" column="0">
+         <layout class="QVBoxLayout" name="user_field">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="user_name_value_caption">
+            <property name="text">
+             <string>USER NAME</string>
+            </property>
+            <property name="role" stdset="0">
+             <string>caption</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="user_name_value">
+            <property name="text">
+             <string>-</string>
+            </property>
+            <property name="role" stdset="0">
+             <string>value</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="0" column="1">
+         <layout class="QVBoxLayout" name="role_field">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="role_value_caption">
+            <property name="text">
+             <string>ROLE</string>
+            </property>
+            <property name="role" stdset="0">
+             <string>caption</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="role_value">
+            <property name="text">
+             <string>-</string>
+            </property>
+            <property name="role" stdset="0">
+             <string>value</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="0">
+         <layout class="QVBoxLayout" name="session_field">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="session_start_value_caption">
+            <property name="text">
+             <string>SIGNED IN SINCE</string>
+            </property>
+            <property name="role" stdset="0">
+             <string>caption</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="session_start_value">
+            <property name="text">
+             <string>-</string>
+            </property>
+            <property name="role" stdset="0">
+             <string>value</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="1">
+         <layout class="QVBoxLayout" name="database_field">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="database_value_caption">
+            <property name="text">
+             <string>DATABASE</string>
+            </property>
+            <property name="role" stdset="0">
+             <string>caption</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="database_value">
+            <property name="text">
+             <string>-</string>
+            </property>
+            <property name="role" stdset="0">
+             <string>value</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="0" column="2">
+         <spacer name="spacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="spacer_4">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

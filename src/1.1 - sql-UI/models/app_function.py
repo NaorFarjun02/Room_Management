@@ -148,6 +148,14 @@ def add_new_room_fault(room_number, fault):
     DB_CURSER.execute(sql)
     DB_CON.commit()
 
+def delete_room_fault_db(room_number, fault):
+    """Remove one fault from the room (the fault was fixed)"""
+    DB_CURSER.execute("""
+        DELETE FROM rooms_faults WHERE ctid IN (
+            SELECT ctid FROM rooms_faults WHERE room_number = %s AND fault = %s LIMIT 1)""", (room_number, fault))
+    DB_CON.commit()
+    return OK_CODE, f"Fault fixed in room {room_number}"
+
 # ========================================================================================================================================
 # --------------------------------------------------------------------------------------------------------------------------------------------
 # ====================================================section 10 - delete order====================================================
@@ -272,6 +280,39 @@ def get_rooms_from_db():
     DB_CURSER.execute("SELECT * FROM rooms")
     rooms_list = DB_CURSER.fetchall()
     return rooms_list
+
+def get_rooms_status_from_db():
+    """
+    All the rooms with their live status:
+    (room_number, room_capacity, occupied_now, room_is_clean, faults_count)
+    occupied_now = the room is marked as catch OR a guest is checked-in (and not checked-out) in it
+    """
+    DB_CURSER.execute("""
+        SELECT r.room_number, r.room_capacity,
+            (r.room_is_catch OR EXISTS(SELECT 1 FROM orders o
+                                       WHERE o.room_number = r.room_number AND o.check_in AND NOT o.check_out)),
+            r.room_is_clean,
+            (SELECT COUNT(*) FROM rooms_faults rf WHERE rf.room_number = r.room_number)
+        FROM rooms r
+        ORDER BY r.room_number""")
+    return DB_CURSER.fetchall()
+
+def get_all_orders_from_db(include_closed=False):
+    """
+    All the orders with their dates, open orders only by default (closed = the customer checked-out)
+    (id, customer_name, number_of_guests, room_number, check_in, check_out, start_date, end_date)
+    """
+    sql = """
+        SELECT o.id, o.customer_name, o.number_of_guests, o.room_number, o.check_in, o.check_out,
+            d.start_date, d.end_date
+        FROM orders o
+        LEFT JOIN dates_range d ON d.order_id = o.id
+        """
+    if not include_closed:
+        sql += " WHERE o.check_out = FALSE "
+    sql += " ORDER BY to_date(d.start_date, 'DD/MM/YYYY') NULLS LAST, o.id"
+    DB_CURSER.execute(sql)
+    return DB_CURSER.fetchall()
 
 # =============================================================================================================================
 # --------------------------------------------------------------------------------------------------------------------------------------------

@@ -13,6 +13,8 @@ from .new_order_widget import New_Order_Widget
 from .view_order_widget import View_Order_Widget
 from .rooms_view_widget import Room_View_Widget
 from .update_order_widget import Update_Order_Widget
+from .settings_widget import Settings_Widget
+from .orders_list_widget import Orders_List_Widget
 
 
 class Thread_for_time_and_date(QThread):
@@ -32,6 +34,19 @@ PAGES_HEADERS = {
 	windows_indexes["rooms-view"]: ("Rooms", "Live status of every room in the hotel"),
 	windows_indexes["view-order"]: ("Order details", "Check guests in and out, update or delete the order"),
 	windows_indexes["update-order"]: ("Update order", "Change the details of an existing order"),
+	windows_indexes["settings"]: ("Settings", "Your account"),
+	windows_indexes["orders"]: ("Orders", "Every order in the hotel"),
+}
+
+# which sidebar button is marked for every page (order pages belong to "Orders")
+PAGES_NAV = {
+	windows_indexes["home-menu"]: "home",
+	windows_indexes["orders"]: "orders",
+	windows_indexes["new-order"]: "orders",
+	windows_indexes["view-order"]: "orders",
+	windows_indexes["update-order"]: "orders",
+	windows_indexes["rooms-view"]: "rooms",
+	windows_indexes["settings"]: "settings",
 }
 
 
@@ -51,12 +66,14 @@ class Main_Page(QMainWindow):
 		######################## buttons section #########################
 		self.setting_button.clicked.connect(self.settings_function)  # click event to the settings button
 		self.nav_home_btn.clicked.connect(lambda: self.go_to_page(windows_indexes["home-menu"]))
-		self.nav_new_order_btn.clicked.connect(lambda: self.go_to_page(windows_indexes["new-order"]))
+		self.nav_orders_btn.clicked.connect(lambda: self.go_to_page(windows_indexes["orders"]))
 		self.nav_rooms_btn.clicked.connect(lambda: self.go_to_page(windows_indexes["rooms-view"]))
+		self.add_room_btn.clicked.connect(self.add_room_function)  # click event to the add room button
 		self.nav_buttons = {
-			windows_indexes["home-menu"]: self.nav_home_btn,
-			windows_indexes["new-order"]: self.nav_new_order_btn,
-			windows_indexes["rooms-view"]: self.nav_rooms_btn,
+			"home": self.nav_home_btn,
+			"orders": self.nav_orders_btn,
+			"rooms": self.nav_rooms_btn,
+			"settings": self.setting_button,
 		}
 		self.setup_sidebar_icons()
 		##################################################################
@@ -78,6 +95,12 @@ class Main_Page(QMainWindow):
 		update_order_widget = Update_Order_Widget(self.widget_section)  # create a new order widget
 		self.widget_section.insertWidget(windows_indexes [ "update-order" ],update_order_widget)  # add new order widget to the stack
 		# -------------------------------------------------------------------------------------------------------------#
+		settings_widget = Settings_Widget(self.widget_section)  # create a settings widget
+		self.widget_section.insertWidget(windows_indexes["settings"], settings_widget)  # add settings widget to the stack
+		# -------------------------------------------------------------------------------------------------------------#
+		orders_list_widget = Orders_List_Widget(self.widget_section)  # create a orders list widget
+		self.widget_section.insertWidget(windows_indexes["orders"], orders_list_widget)  # add orders list widget to the stack
+		# -------------------------------------------------------------------------------------------------------------#
 
 		##################################################################
 		self.widget_section.currentChanged.connect(self.page_changed)  # keep the header + sidebar in sync with the page
@@ -96,8 +119,8 @@ class Main_Page(QMainWindow):
 
 
 	def setup_sidebar_icons(self):
-		sidebar_icons = [(self.nav_home_btn, "home"), (self.nav_new_order_btn, "plus"), (self.nav_rooms_btn, "bed"),
-						 (self.setting_button, "settings")]
+		sidebar_icons = [(self.nav_home_btn, "home"), (self.nav_orders_btn, "calendar"), (self.nav_rooms_btn, "bed"),
+						 (self.add_room_btn, "plus"), (self.setting_button, "settings")]
 		for btn, icon_name in sidebar_icons:
 			btn.setIcon(theme.icon(icon_name, theme.COLORS["sidebar_text"], 20))
 			btn.setIconSize(QSize(20, 20))
@@ -106,20 +129,27 @@ class Main_Page(QMainWindow):
 	def go_to_page(self, index):
 		# start when click on one of the sidebar buttons
 		if index == windows_indexes["rooms-view"]:
-			self.widget_section.widget(index).refresh_rooms_status()
+			self.widget_section.widget(index).set_filter("all")  # from the sidebar -> show all the rooms
 		self.widget_section.setCurrentIndex(index)
+
+
+	def add_room_function(self):
+		# start when click on the add room button, show the rooms page if a room was added
+		rooms_view_widget = self.widget_section.widget(windows_indexes["rooms-view"])
+		if rooms_view_widget.new_room():
+			self.go_to_page(windows_indexes["rooms-view"])
 
 
 	def page_changed(self, index):
 		title, subtitle = PAGES_HEADERS.get(index, ("", ""))
 		self.title_bar.set_page_title(title, subtitle)
-		for page_index, btn in self.nav_buttons.items():
-			theme.set_selected(btn, page_index == index)
+		for nav_name, btn in self.nav_buttons.items():
+			theme.set_selected(btn, PAGES_NAV.get(index) == nav_name)
 
 
 	def settings_function(self):
 		# start when click on the settings button
-		print("settings")
+		self.go_to_page(windows_indexes["settings"])
 
 
 	def set_time_and_date_for_display(self,time_date):

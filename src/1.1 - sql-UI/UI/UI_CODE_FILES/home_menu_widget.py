@@ -40,8 +40,10 @@ class Home_Menu_Widget(QWidget):
             "catch": Stat_Tile("Occupied now", "users", theme.COLORS["accent"]),
             "dirty": Stat_Tile("Need cleaning", "alert", theme.COLORS["warning"]),
         }
-        for tile in self.stat_tiles.values():
+        tiles_filters = {"total": "all", "free": "free", "catch": "catch", "dirty": "dirty"}
+        for key, tile in self.stat_tiles.items():
             self.stats_layout.addWidget(tile)
+            tile.clicked.connect(lambda k=key: self.show_rooms_filtered(tiles_filters[k]))  # rooms page with the filter
 
     def showEvent(self, event):
         # every time the dashboard is shown, refresh the rooms numbers
@@ -50,7 +52,7 @@ class Home_Menu_Widget(QWidget):
 
     def refresh_stats(self):
         try:
-            rooms = get_rooms_from_db()  # (room_number, capacity, is_catch, is_clean)
+            rooms = get_rooms_status_from_db()  # (room_number, capacity, occupied_now, is_clean, faults_count)
         except Exception as e:
             print(e)
             return
@@ -67,7 +69,11 @@ class Home_Menu_Widget(QWidget):
 
     def rooms_function(self):
         # start when click on the rooms button
-        self.widget.widget(windows_indexes["rooms-view"]).refresh_rooms_status()
+        self.show_rooms_filtered("all")
+
+    def show_rooms_filtered(self, filter_key):
+        # go to the rooms page and show only the rooms in the filter (all / free / catch / dirty)
+        self.widget.widget(windows_indexes["rooms-view"]).set_filter(filter_key)
         self.widget.setCurrentIndex(windows_indexes["rooms-view"])
 
     def search_order_function(self):

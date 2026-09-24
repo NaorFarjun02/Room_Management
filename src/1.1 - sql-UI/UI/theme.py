@@ -295,6 +295,10 @@ QFrame[card="true"] {{
     border: 1px solid {border};
     border-radius: 14px;
 }}
+QFrame[clickable="true"]:hover {{
+    border: 1px solid {accent_soft_border};
+    background: #FBFEFD;
+}}
 QFrame[card="true"] QFrame[card="inner"] {{
     background: {surface_alt};
     border: 1px solid {border};
@@ -460,6 +464,36 @@ QSpinBox[readOnly="true"] {{
     font-size: 16px;
     font-weight: 600;
 }}
+QComboBox {{
+    background: {surface};
+    border: 1px solid {border_strong};
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 15px;
+}}
+QComboBox:focus, QComboBox:on {{
+    border: 2px solid {accent};
+    padding: 7px 11px;
+}}
+QComboBox:disabled {{
+    color: {text_faint};
+    background: {surface_alt};
+}}
+QComboBox::drop-down {{
+    subcontrol-origin: border;
+    subcontrol-position: center right;
+    width: 32px;
+    border: none;
+}}
+QComboBox::down-arrow {{ image: url(UI/ICONS/theme/chevron_down.svg); width: 14px; height: 14px; }}
+QComboBox QAbstractItemView {{
+    background: {surface};
+    border: 1px solid {border};
+    padding: 4px;
+    outline: none;
+    selection-background-color: {accent_soft};
+    selection-color: {accent_pressed};
+}}
 QFrame#hero_frame QLineEdit {{
     background: #FFFFFF;
     border: none;
@@ -592,6 +626,13 @@ QLabel[tone="neutral"] {{ background: {border}; color: {text_muted}; }}
 QLabel[tone="accent"] {{ background: {accent_soft}; color: {accent_pressed}; }}
 QLabel[tone="info"] {{ background: {info_soft}; color: {info}; }}
 
+QLabel[role="avatar"] {{
+    background: {accent};
+    color: #FFFFFF;
+    border-radius: 32px;
+    font-size: 26px;
+    font-weight: 700;
+}}
 QLabel[role="card_icon"] {{
     background: {accent_soft};
     border-radius: 12px;

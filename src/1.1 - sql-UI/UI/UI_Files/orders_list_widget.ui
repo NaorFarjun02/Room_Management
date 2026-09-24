@@ -39,7 +39,7 @@
        <item>
         <widget class="QLabel" name="title_label">
          <property name="text">
-          <string>All rooms</string>
+          <string>Open orders</string>
          </property>
          <property name="role" stdset="0">
           <string>h2</string>
@@ -47,7 +47,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="rooms_count_label">
+        <widget class="QLabel" name="orders_count_label">
          <property name="text">
           <string/>
          </property>
@@ -59,7 +59,7 @@
       </layout>
      </item>
      <item>
-      <spacer name="toolbar_spacer">
+      <spacer name="spacer_1">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -72,48 +72,40 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="home_btn">
+      <widget class="QPushButton" name="show_closed_btn">
+       <property name="text">
+        <string>Show closed orders</string>
+       </property>
        <property name="cursor">
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
-       <property name="text">
-        <string>Dashboard</string>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
        </property>
        <property name="variant" stdset="0">
-        <string>ghost</string>
+        <string>chip</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="new_fault_btn">
+      <widget class="QPushButton" name="new_order_btn">
+       <property name="text">
+        <string>New order</string>
+       </property>
        <property name="cursor">
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
-       <property name="text">
-        <string>Report fault</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="new_room_btn">
-       <property name="cursor">
-        <cursorShape>PointingHandCursor</cursorShape>
-       </property>
-       <property name="text">
-        <string>Add room</string>
+       <property name="autoDefault">
+        <bool>false</bool>
        </property>
        <property name="variant" stdset="0">
         <string>primary</string>
        </property>
       </widget>
      </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="filters_layout">
-     <property name="spacing">
-      <number>8</number>
-     </property>
     </layout>
    </item>
    <item>
@@ -145,22 +137,14 @@
        </layout>
       </item>
       <item>
-       <widget class="QScrollArea" name="rooms_scrollArea">
-        <property name="horizontalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
-        </property>
+       <widget class="QScrollArea" name="orders_scrollArea">
         <property name="widgetResizable">
          <bool>true</bool>
         </property>
-        <widget class="QWidget" name="scrollAreaWidgetContents_rooms">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>1034</width>
-           <height>560</height>
-          </rect>
-         </property>
+        <property name="horizontalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
+        <widget class="QWidget" name="scrollAreaWidgetContents_orders">
          <layout class="QVBoxLayout" name="verticalLayout">
           <property name="spacing">
            <number>0</number>
@@ -178,14 +162,14 @@
            <number>0</number>
           </property>
           <item>
-           <layout class="QVBoxLayout" name="rooms_widget">
+           <layout class="QVBoxLayout" name="orders_widget">
             <property name="spacing">
              <number>0</number>
             </property>
            </layout>
           </item>
           <item>
-           <spacer name="rooms_bottom_spacer">
+           <spacer name="spacer_2">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
             </property>

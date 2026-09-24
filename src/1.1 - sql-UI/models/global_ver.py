@@ -39,9 +39,11 @@ windows_indexes = {
 
     "settings": 5,
 
-    "manager-page": 6,
+    "orders": 6,
 
-    "login-create": 7,
+    "manager-page": 7,
+
+    "login-create": 8,
 
     "msg-box": 33,
 
