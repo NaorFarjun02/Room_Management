@@ -27,7 +27,7 @@ def table_row_layout(frame):
     """same margins / spacing for a table header and for its rows so the columns line up"""
     layout = QHBoxLayout(frame)
     layout.setContentsMargins(24, 0, 16, 0)
-    layout.setSpacing(12)
+    layout.setSpacing(10)
     return layout
 
 

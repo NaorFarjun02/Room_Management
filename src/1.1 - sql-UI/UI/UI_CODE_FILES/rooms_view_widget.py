@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtWidgets import QWidget, QFrame, QPushButton
+from PyQt5.QtWidgets import QWidget, QFrame, QPushButton, QHBoxLayout
 from PyQt5.uic import loadUi
 
 from models import *
@@ -10,11 +10,11 @@ from .room_dates_catch_dialog import Dates_Catch_Dialog
 from .room_faults_dialog import Faults_Dialog
 from .new_room_dialog import New_Room_Dialog
 from .new_room_fault_dialog import New_Fault_Dialog
-from .components import cell, pill_holder, table_header, table_row_layout, fixed_cell
+from .components import cell, pill, pill_holder, table_header, table_row_layout, fixed_cell
 from UI import theme
 
-COLUMNS_TITLES = ["ROOM", "CAPACITY", "STATUS (NOW)", "CLEANING", "FAULTS", "BOOKED DATES"]
-COLUMNS_WIDTH = [120, 110, 150, 160, 130, 150]  # room, capacity, status, cleaning, faults, dates
+COLUMNS_TITLES = ["ROOM", "CAPACITY", "STATUS", "CLEANING", "FAULTS", "BOOKED DATES"]
+COLUMNS_WIDTH = [86, 82, 96, 272, 124, 122]  # room, capacity, status, cleaning, faults, dates
 
 # the filters of the rooms table: key -> (button text, function that says if a room is in the filter)
 # room = (room_number, room_capacity, occupied_now, room_is_clean, faults_count)
@@ -147,7 +147,7 @@ class Room_View_Widget(QWidget):
         if room[3]:
             layout.addWidget(pill_holder("Clean", "success", COLUMNS_WIDTH[3]))
         else:
-            layout.addWidget(pill_holder("Needs cleaning", "warning", COLUMNS_WIDTH[3]))
+            layout.addWidget(self.create_needs_cleaning_cell(room[0]))
 
         faults_count = room[4]
         faults_room = QPushButton(f" Faults ({faults_count})" if faults_count else " No faults", room_frame)
@@ -184,7 +184,32 @@ class Room_View_Widget(QWidget):
 
         return room_frame
 
+    def create_needs_cleaning_cell(self, room_number):
+        """"Needs cleaning" pill + a button to mark the room as clean"""
+        cleaning_cell = QFrame()
+        cleaning_cell.setFixedWidth(COLUMNS_WIDTH[3])
+        cleaning_layout = QHBoxLayout(cleaning_cell)
+        cleaning_layout.setContentsMargins(0, 0, 0, 0)
+        cleaning_layout.setSpacing(8)
+        cleaning_layout.addWidget(pill("Needs cleaning", "warning"), 0, Qt.AlignVCenter)
+
+        mark_clean_btn = QPushButton(" Mark clean", cleaning_cell)
+        mark_clean_btn.setObjectName("mark_clean_btn")
+        mark_clean_btn.setProperty("variant", "link")
+        mark_clean_btn.setCursor(Qt.PointingHandCursor)
+        mark_clean_btn.setToolTip(f"Mark room {room_number} as clean")
+        mark_clean_btn.setIcon(theme.icon("check", theme.COLORS["accent"], 16))
+        mark_clean_btn.setIconSize(QSize(16, 16))
+        mark_clean_btn.clicked.connect(lambda: self.mark_room_clean(room_number))
+        cleaning_layout.addWidget(mark_clean_btn, 0, Qt.AlignVCenter)
+        cleaning_layout.addStretch()
+        return cleaning_cell
+
     # -------------------------clicked event functions-------------------------
+
+    def mark_room_clean(self, room_number):
+        set_room_clean_db(room_number, True)
+        self.refresh_rooms_status()  # update the row + the filters numbers
 
     def delete_room(self, room_number):
         delete_status = MSG_Dialog(f"Delete room number {room_number}", "Yes",

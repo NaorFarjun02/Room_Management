@@ -1,6 +1,6 @@
 import random
 
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 from .Logs import *
 from .global_ver import *
@@ -207,6 +207,9 @@ def check_out_db(order_id=-1):
                 return False, f"Can't be checked-out ,The customer is leaving not between arrival and leaving dates of the orders: {start_date} to {end_date}"
             check_query = DB_CURSER.mogrify("""update orders set check_out = TRUE where id = %s""" % order_id)
             DB_CURSER.execute(check_query)
+            # the guest left -> the room needs cleaning
+            DB_CURSER.execute("""UPDATE rooms SET room_is_clean = FALSE
+                WHERE room_number = (SELECT room_number FROM orders WHERE id = %s)""", (order_id,))
             create_log_order_room(ORDERS_LOGGER_LEVELS["order-check-out"]["value"],
                                   ORDERS_LOGGER_LEVELS["order-check-out"]["msg"] % order_id)
             DB_CON.commit()
@@ -239,10 +242,15 @@ def check_in_db(order_id=-1):
     try:
         in_status, out_status = get_check_in_and_out_status(order_id)
         if not in_status and not out_status:
-            today = date.today().strftime("%d/%m/%Y")
+            today = date.today()
             start_date, end_date = get_start_and_end_dates(order_id)
-            if start_date > today >= end_date:
-                return False, f"Can't be checked-in ,The customer is arrival not between arrival and leaving dates of the orders: {start_date} to {end_date}"
+            arrival = datetime.strptime(start_date, "%d/%m/%Y").date()
+            leaving = datetime.strptime(end_date, "%d/%m/%Y").date()
+            if not (arrival <= today < leaving):
+                # check-in is possible from the arrival day until the day before leaving
+                last_day = (leaving - timedelta(days=1)).strftime("%d/%m/%Y")
+                return False, (f"Check-in is only possible from {start_date} until {last_day} (the day before leaving). "
+                               f"Today is {today.strftime('%d/%m/%Y')}.")
             check_query = DB_CURSER.mogrify("""update orders set check_in = TRUE where id = %s""" % order_id)
             DB_CURSER.execute(check_query)
             create_log_order_room(ORDERS_LOGGER_LEVELS["order-check-in"]["value"],
@@ -255,6 +263,7 @@ def check_in_db(order_id=-1):
             return False, "The customer is already check out!!"
     except Exception as e:
         print("check-in in db: ", e)
+        return False, f"Can't check-in: {e}"
 
 def cancel_check_in_db(order_id=-1):
     in_status, out_status = get_check_in_and_out_status(order_id)
@@ -339,6 +348,12 @@ def create_room_in_db(room_capacity: int):
     DB_CURSER.execute("INSERT INTO rooms (room_capacity) VALUES(%s)" % room_capacity)
     DB_CON.commit()
     return True
+
+def set_room_clean_db(room_number, clean=True):
+    """Mark the room as clean (or as needs cleaning when clean=False)"""
+    DB_CURSER.execute("UPDATE rooms SET room_is_clean = %s WHERE room_number = %s", (clean, room_number))
+    DB_CON.commit()
+    return OK_CODE, f"Room {room_number} is {'clean' if clean else 'needs cleaning'}"
 
 # =================================================================================================================================
 # --------------------------------------------------------------------------------------------------------------------------------------------
