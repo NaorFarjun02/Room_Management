@@ -1,0 +1,2 @@
+# local Python virtual env (run.sh / run.cmd use it when it exists)
+.venv/
