@@ -1,5 +1,8 @@
 try:
     from .global_ver import *
+    from . import activity_log
+    from . import session  # module import on purpose: session.current stays live, see session.py
+    from . import auth
     from .app_function import *
     from .Logs import *
     from .dialogs import *

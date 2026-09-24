@@ -2,10 +2,11 @@ import datetime
 from datetime import datetime
 
 from PyQt5.QtWidgets import QWidget
-from PyQt5.QtCore import QDate
+from PyQt5.QtCore import QDate, QSize
 from PyQt5.uic import loadUi
 
 from models import *
+from UI import theme
 
 class New_Order_Widget(QWidget):
     def __init__(self, widget):
@@ -30,6 +31,7 @@ class New_Order_Widget(QWidget):
         self.lunch_btn.clicked.connect(self.lunch)
         self.dinner_btn.clicked.connect(self.dinner)
         self.cencel_btn.clicked.connect(self.cencel)
+        self.setup_icons()
         ######################################################################
 
         self.arrival_date.calendarWidget().clicked.connect(self.set_leaving_date_min)  # when select date for arrival
@@ -101,82 +103,27 @@ class New_Order_Widget(QWidget):
 
     def breakfast(self):
         self.breakfast_status = not self.breakfast_status  # change status for the select
-        style = """
-			QPushButton:hover {
-				background-color: rgb(48, 120, 200);
-			}
-			QPushButton{
-				border-radius:15px;
-				font: 25px "Calibri";
-				border:1px solid rgb(255, 255, 255);
-		"""  # the basic style for the button
-        if self.breakfast_status:
-            style += """background-color: rgb(48, 120, 200);"""  # add background color when the status is true
-        style += """	}	"""  # close style
-        self.breakfast_btn.setStyleSheet(style)  # set the style sheet for the button
+        theme.set_selected(self.breakfast_btn, self.breakfast_status)  # show the button as selected / not selected
 
     def lunch(self):
         self.lunch_status = not self.lunch_status  # change status for the select
-        style = """
-			QPushButton:hover {
-				background-color: rgb(48, 120, 200);
-			}
-			QPushButton{
-				border-radius:15px;
-				font: 25px "Calibri";
-				border:1px solid rgb(255, 255, 255);
-		"""  # the basic style for the button
-        if self.lunch_status:
-            style += """background-color: rgb(48, 120, 200);"""  # add background color when the status is true
-        style += """	}	"""  # close style
-        self.lunch_btn.setStyleSheet(style)  # set the style sheet for the button
+        theme.set_selected(self.lunch_btn, self.lunch_status)  # show the button as selected / not selected
 
     def dinner(self):
         self.dinner_status = not self.dinner_status  # change status for the select
-        style = """
-			QPushButton:hover {
-				background-color: rgb(48, 120, 200);
-			}
-			QPushButton{
-				border-radius:15px;
-				font: 25px "Calibri";
-				border:1px solid rgb(255, 255, 255);
-		"""  # the basic style for the button
-        if self.dinner_status:
-            style += """background-color: rgb(48, 120, 200);"""  # add background color when the status is true
-        style += """	}	"""  # close style
-        self.dinner_btn.setStyleSheet(style)  # set the style sheet for the button
+        theme.set_selected(self.dinner_btn, self.dinner_status)  # show the button as selected / not selected
 
     def electric_car(self):
         self.electric_car_status = not self.electric_car_status  # change status for the select
-        style = """
-			QPushButton:hover {
-				background-color: rgb(10, 123, 204);
-			}
-			QPushButton{
-				border-radius:15px;
-				border-radius:10px;
-				color: rgb(255, 255, 255);
-				border:2px solid  rgb(255, 255, 255);	
-		"""  # the basic style for the button
-        if self.electric_car_status:
-            style += """	background: rgb(10, 123, 204);	"""  # add background color when the status is true
-        style += """	}	"""  # close style
-        self.check_electric_car_btn.setStyleSheet(style)  # set the style sheet for the button
+        theme.set_selected(self.check_electric_car_btn, self.electric_car_status)  # show the button as selected / not selected
 
     def pet(self):
         self.pet_status = not self.pet_status  # change status for the select
-        style = """
-			QPushButton:hover {
-				background-color: rgb(10, 123, 204);
-			}
-			QPushButton{
-				border-radius:15px;
-				border-radius:10px;
-				color: rgb(255, 255, 255);
-				border:2px solid  rgb(255, 255, 255);
-		"""  # the basic style for the button
-        if self.pet_status:
-            style += """	background: rgb(10, 123, 204);	"""  # add background color when the status is true
-        style += """	}	"""  # close style
-        self.check_pet_btn.setStyleSheet(style)  # set the style sheet for the button
+        theme.set_selected(self.check_pet_btn, self.pet_status)  # show the button as selected / not selected
+
+    def setup_icons(self):
+        chips_icons = [(self.breakfast_btn, "coffee"), (self.lunch_btn, "sun"), (self.dinner_btn, "moon"),
+                       (self.check_electric_car_btn, "bolt"), (self.check_pet_btn, "paw")]
+        for btn, icon_name in chips_icons:
+            btn.setIcon(theme.icon(icon_name, theme.COLORS["accent"], 18))
+            btn.setIconSize(QSize(18, 18))
