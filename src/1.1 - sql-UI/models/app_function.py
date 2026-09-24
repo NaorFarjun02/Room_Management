@@ -201,10 +201,14 @@ def check_out_db(order_id=-1):
     try:
         in_status, out_status = get_check_in_and_out_status(order_id)
         if in_status and not out_status:
-            today = date.today().strftime("%d/%m/%Y")
+            today = date.today()
             start_date, end_date = get_start_and_end_dates(order_id)
-            if start_date >= today > end_date:
-                return False, f"Can't be checked-out ,The customer is leaving not between arrival and leaving dates of the orders: {start_date} to {end_date}"
+            arrival = datetime.strptime(start_date, "%d/%m/%Y").date()
+            leaving = datetime.strptime(end_date, "%d/%m/%Y").date()
+            if not (arrival <= today <= leaving):
+                # check-out is possible from the arrival day until the leaving day (leaving early is ok)
+                return False, (f"Check-out is only possible from {start_date} until {end_date} (the leaving day). "
+                               f"Today is {today.strftime('%d/%m/%Y')}.")
             check_query = DB_CURSER.mogrify("""update orders set check_out = TRUE where id = %s""" % order_id)
             DB_CURSER.execute(check_query)
             # the guest left -> the room needs cleaning
@@ -219,7 +223,8 @@ def check_out_db(order_id=-1):
         elif not in_status:
             return False, "The customer not check-in yet!!"
     except Exception as e:
-        print("check-in in db: ", e)
+        print("check-out in db: ", e)
+        return False, f"Can't check-out: {e}"
 
 def cancel_check_out_db(order_id=-1):
     in_status, out_status = get_check_in_and_out_status(order_id)
