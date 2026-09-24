@@ -93,6 +93,25 @@ def get_start_and_end_dates(order_id=-1):
     start_date, end_date = DB_CURSER.fetchone()
     return start_date, end_date
 
+def get_active_order_in_room_db(order_id):
+    """
+    Another order in the same room as this order that is checked-in and not checked-out
+    (id, customer_name, room_number, end_date) or None
+    """
+    DB_CURSER.execute("""
+        SELECT o.id, o.customer_name, o.room_number, d.end_date
+        FROM orders o LEFT JOIN dates_range d ON d.order_id = o.id
+        WHERE o.room_number = (SELECT room_number FROM orders WHERE id = %s)
+            AND o.id <> %s AND o.check_in AND NOT o.check_out
+        ORDER BY o.id LIMIT 1""", (order_id, order_id))
+    return DB_CURSER.fetchone()
+
+def is_order_overdue(end_date, check_in, check_out):
+    """True if the guest is checked-in, not checked-out and the leaving date (dd/mm/yyyy) already passed"""
+    if not end_date or not check_in or check_out:
+        return False
+    return datetime.strptime(end_date, "%d/%m/%Y").date() < date.today()
+
 def get_date_range_by_room_id_db(room_number=-1):
     dates_q = DB_CURSER.mogrify("""select start_date,end_date from dates_range where room_number = %s""" % room_number)
     DB_CURSER.execute(dates_q)
@@ -205,9 +224,9 @@ def check_out_db(order_id=-1):
             start_date, end_date = get_start_and_end_dates(order_id)
             arrival = datetime.strptime(start_date, "%d/%m/%Y").date()
             leaving = datetime.strptime(end_date, "%d/%m/%Y").date()
-            if not (arrival <= today <= leaving):
-                # check-out is possible from the arrival day until the leaving day (leaving early is ok)
-                return False, (f"Check-out is only possible from {start_date} until {end_date} (the leaving day). "
+            if today < arrival:
+                # check-out is possible from the arrival day (leaving early / late is ok)
+                return False, (f"Check-out is only possible from the arrival day ({start_date}). "
                                f"Today is {today.strftime('%d/%m/%Y')}.")
             check_query = DB_CURSER.mogrify("""update orders set check_out = TRUE where id = %s""" % order_id)
             DB_CURSER.execute(check_query)
@@ -256,6 +275,14 @@ def check_in_db(order_id=-1):
                 last_day = (leaving - timedelta(days=1)).strftime("%d/%m/%Y")
                 return False, (f"Check-in is only possible from {start_date} until {last_day} (the day before leaving). "
                                f"Today is {today.strftime('%d/%m/%Y')}.")
+            active_order = get_active_order_in_room_db(order_id)
+            if active_order is not None:
+                # another guest is still checked-in in the room -> can't check-in, return the order so the user can go to it
+                active_id, active_customer, active_room, active_end = active_order
+                msg = f"Room {active_room} still has an open order: #{str(active_id).zfill(8)} ({active_customer})."
+                if active_end and datetime.strptime(active_end, "%d/%m/%Y").date() < today:
+                    msg += f" Its leaving date {active_end} has passed and it was not checked-out."
+                return False, msg + " Check-out that order first.", active_id
             check_query = DB_CURSER.mogrify("""update orders set check_in = TRUE where id = %s""" % order_id)
             DB_CURSER.execute(check_query)
             create_log_order_room(ORDERS_LOGGER_LEVELS["order-check-in"]["value"],
@@ -298,15 +325,20 @@ def get_rooms_from_db():
 def get_rooms_status_from_db():
     """
     All the rooms with their live status:
-    (room_number, room_capacity, occupied_now, room_is_clean, faults_count)
+    (room_number, room_capacity, occupied_now, room_is_clean, faults_count, overdue_order_id)
     occupied_now = the room is marked as catch OR a guest is checked-in (and not checked-out) in it
+    overdue_order_id = an order in the room that its leaving date passed but it was not checked-out (None if there isn't)
     """
     DB_CURSER.execute("""
         SELECT r.room_number, r.room_capacity,
             (r.room_is_catch OR EXISTS(SELECT 1 FROM orders o
                                        WHERE o.room_number = r.room_number AND o.check_in AND NOT o.check_out)),
             r.room_is_clean,
-            (SELECT COUNT(*) FROM rooms_faults rf WHERE rf.room_number = r.room_number)
+            (SELECT COUNT(*) FROM rooms_faults rf WHERE rf.room_number = r.room_number),
+            (SELECT o.id FROM orders o JOIN dates_range d ON d.order_id = o.id
+             WHERE o.room_number = r.room_number AND o.check_in AND NOT o.check_out
+                AND to_date(d.end_date, 'DD/MM/YYYY') < CURRENT_DATE
+             ORDER BY o.id LIMIT 1)
         FROM rooms r
         ORDER BY r.room_number""")
     return DB_CURSER.fetchall()

@@ -325,6 +325,16 @@ QFrame#hero_frame QLabel#search_hint {{
     font-size: 12px;
 }}
 
+QFrame#overdue_banner {{
+    background: {danger_soft};
+    border: 1px solid #F2B8B5;
+    border-radius: 10px;
+}}
+QFrame#overdue_banner QLabel {{
+    color: {danger};
+    font-weight: 600;
+}}
+
 /* ------------------------------------------------ buttons ------------------------------------------------ */
 QPushButton {{
     background: {surface};
@@ -399,6 +409,14 @@ QPushButton[variant="link"] {{
 QPushButton[variant="link"]:hover {{
     background: {accent_soft};
     border-color: {accent_soft_border};
+}}
+QPushButton[variant="link"][tone="danger"] {{
+    color: {danger};
+    border-color: #F2B8B5;
+}}
+QPushButton[variant="link"][tone="danger"]:hover {{
+    background: {danger_soft};
+    border-color: {danger};
 }}
 QPushButton[variant="hero"] {{
     background: {accent_light};

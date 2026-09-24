@@ -14,10 +14,10 @@ from .components import cell, pill, pill_holder, table_header, table_row_layout,
 from UI import theme
 
 COLUMNS_TITLES = ["ROOM", "CAPACITY", "STATUS", "CLEANING", "FAULTS", "BOOKED DATES"]
-COLUMNS_WIDTH = [86, 82, 96, 272, 124, 122]  # room, capacity, status, cleaning, faults, dates
+COLUMNS_WIDTH = [86, 82, 116, 272, 124, 122]  # room, capacity, status, cleaning, faults, dates
 
 # the filters of the rooms table: key -> (button text, function that says if a room is in the filter)
-# room = (room_number, room_capacity, occupied_now, room_is_clean, faults_count)
+# room = (room_number, room_capacity, occupied_now, room_is_clean, faults_count, overdue_order_id)
 ROOMS_FILTERS = {
     "all": ("All rooms", lambda room: True),
     "free": ("Available now", lambda room: not room[2]),
@@ -132,7 +132,7 @@ class Room_View_Widget(QWidget):
     def create_room_frame(self, room=None):
         if room is None:
             return None
-        # room = (room_number, room_capacity, occupied_now, room_is_clean, faults_count)
+        # room = (room_number, room_capacity, occupied_now, room_is_clean, faults_count, overdue_order_id)
         room_frame = QFrame(self)
         room_frame.setProperty("row", "true")
         room_frame.setFixedHeight(64)
@@ -140,7 +140,19 @@ class Room_View_Widget(QWidget):
 
         layout.addWidget(cell(f"Room {room[0]}", COLUMNS_WIDTH[0], "cell_strong"))
         layout.addWidget(cell(f"{room[1]} guests", COLUMNS_WIDTH[1]))
-        if room[2]:
+        if room[5]:
+            # the guest should have left already but the order was not checked-out -> warning that opens the order
+            overdue_btn = QPushButton(" Overdue", room_frame)
+            overdue_btn.setObjectName("room_overdue_btn")
+            overdue_btn.setProperty("variant", "link")
+            overdue_btn.setProperty("tone", "danger")
+            overdue_btn.setCursor(Qt.PointingHandCursor)
+            overdue_btn.setToolTip(f"Order #{str(room[5]).zfill(8)} passed its leaving date and was not checked-out - click to open it")
+            overdue_btn.setIcon(theme.icon("alert", theme.COLORS["danger"], 16))
+            overdue_btn.setIconSize(QSize(16, 16))
+            overdue_btn.clicked.connect(lambda: self.open_order(room[5]))
+            layout.addWidget(fixed_cell(overdue_btn, COLUMNS_WIDTH[2]))
+        elif room[2]:
             layout.addWidget(pill_holder("Occupied", "info", COLUMNS_WIDTH[2]))
         else:
             layout.addWidget(pill_holder("Available", "success", COLUMNS_WIDTH[2]))
@@ -206,6 +218,12 @@ class Room_View_Widget(QWidget):
         return cleaning_cell
 
     # -------------------------clicked event functions-------------------------
+
+    def open_order(self, order_id):
+        view_order_widget = self.widget.widget(windows_indexes["view-order"])
+        view_order_widget.set_order_to_display(order_id)
+        view_order_widget.display_order()
+        self.widget.setCurrentIndex(windows_indexes["view-order"])
 
     def mark_room_clean(self, room_number):
         set_room_clean_db(room_number, True)

@@ -33,6 +33,10 @@ class View_Order_Widget(QWidget):
             btn.setIcon(theme.icon(icon_name, color, 18))
             btn.setIconSize(QSize(18, 18))
 
+        self.leaving_date = ""  # leaving date of the order that is displayed (dd/mm/yyyy)
+        self.overdue_icon.setPixmap(theme.pixmap("alert", theme.COLORS["danger"], 20))
+        self.overdue_banner.setVisible(False)  # shown only when the order is overdue
+
     def check_in_order(self):
         """
         Change the status of check-in for the order after ask the user in dialog
@@ -46,14 +50,22 @@ class View_Order_Widget(QWidget):
         try:
             if self.check_in_status:
                 # if the check-in status is True that mean the user is click to check-in the order
-                error = check_in_db(order_id=self.order_id)  # tupel of (check-in status,error)
+                error = check_in_db(order_id=self.order_id)  # tupel of (check-in status,error[,open order in the room])
                 if error[0]:
                     # if no error check-in the customer
                     self.change_btn_color(self.check_in_btn, self.check_in_status)  # add color to button
                 else:
                     # if there is a error when try to check-in
                     self.check_in_status = not self.check_in_status  # return the value to what was before the function
-                    MSG_Popup(error[1]).exec_()  # show the error in popup msg
+                    if len(error) > 2:
+                        # another order is still open in the room -> let the user go to it
+                        go_to = MSG_Dialog(error[1], "Open that order", "Cancel")
+                        go_to.exec_()
+                        if go_to.status == "Open that order":
+                            self.set_order_to_display(error[2])
+                            self.display_order()
+                    else:
+                        MSG_Popup(error[1]).exec_()  # show the error in popup msg
             # print(error[1])
             else:
                 # if the check-in status is False that mean the user is click to cencel check-in the order
@@ -72,6 +84,8 @@ class View_Order_Widget(QWidget):
         Change the status of check-out for the order after ask the user in dialog
         """
         msg_label = "Check-out customer and close order??" if not self.check_out_status else "Cancel check-out customer??"
+        if not self.check_out_status and self.is_overdue():
+            msg_label = f"The leaving date {self.leaving_date} has passed. Check-out the customer and close the order?"
         q = MSG_Dialog(msg_label, "Yes", "No")  # ask the user if he want to check-out/undo check-out for this order
         q.exec_()
         if q.status == "No":
@@ -136,6 +150,7 @@ class View_Order_Widget(QWidget):
         Clear the UI object -> set the text to defualt
         """
         self.order_id_label.setText("Order")
+        self.overdue_banner.setVisible(False)
         self.created_by_label.setText("Order created by:")
         self.creation_date_label.setText("Order creation date: ")
         self.customer_name_label.setText("")
@@ -172,6 +187,20 @@ class View_Order_Widget(QWidget):
                                         (order[6], self.dinner_label)]
         for order_stat in order_vars_and_widget_labels:
             order_stat[1].setPixmap(theme.status_pixmap(order_stat[0] == True))  # green check / grey dash
+
+        # check-in / check-out buttons show the real status of the order
+        self.check_in_status, self.check_out_status = order[9], order[10]
+        self.change_btn_color(self.check_in_btn, self.check_in_status)
+        self.change_btn_color(self.check_out_btn, self.check_out_status)
+
+        # warning when the leaving date passed and the order is still open
+        self.leaving_date = orders_dates[1]
+        self.overdue_banner.setVisible(self.is_overdue())
+        self.overdue_label.setText(f"The leaving date {self.leaving_date} has passed and the guest was not checked-out yet. "
+                                   f"Check-out the guest to close the order and free room {order[3]}.")
+
+    def is_overdue(self):
+        return is_order_overdue(self.leaving_date, self.check_in_status, self.check_out_status)
 
     def set_order_to_display(self, order_id=-1):
         """

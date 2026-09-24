@@ -83,6 +83,8 @@ class Orders_List_Widget(QWidget):
         layout.addWidget(cell(dates, COLUMNS_WIDTH[4]))
         if order[5]:
             layout.addWidget(pill_holder("Closed", "neutral", COLUMNS_WIDTH[5]))
+        elif is_order_overdue(order[7], order[4], order[5]):
+            layout.addWidget(pill_holder("Overdue", "danger", COLUMNS_WIDTH[5]))  # leaving date passed, not checked-out
         elif order[4]:
             layout.addWidget(pill_holder("Checked in", "info", COLUMNS_WIDTH[5]))
         else:
