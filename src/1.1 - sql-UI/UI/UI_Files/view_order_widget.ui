@@ -6,869 +6,1022 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1300</width>
-    <height>610</height>
+    <width>1100</width>
+    <height>740</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Form</string>
-  </property>
-  <widget class="QPushButton" name="home_btn">
-   <property name="geometry">
-    <rect>
-     <x>1170</x>
-     <y>550</y>
-     <width>91</width>
-     <height>41</height>
-    </rect>
+  <layout class="QVBoxLayout" name="page_layout">
+   <property name="spacing">
+    <number>20</number>
    </property>
-   <property name="text">
-    <string>Home</string>
+   <property name="leftMargin">
+    <number>32</number>
    </property>
-  </widget>
-  <widget class="QPushButton" name="update_btn">
-   <property name="geometry">
-    <rect>
-     <x>1060</x>
-     <y>550</y>
-     <width>91</width>
-     <height>41</height>
-    </rect>
+   <property name="topMargin">
+    <number>28</number>
    </property>
-   <property name="text">
-    <string>Update</string>
+   <property name="rightMargin">
+    <number>32</number>
    </property>
-  </widget>
-  <widget class="QPushButton" name="delete_btn">
-   <property name="geometry">
-    <rect>
-     <x>950</x>
-     <y>550</y>
-     <width>91</width>
-     <height>41</height>
-    </rect>
+   <property name="bottomMargin">
+    <number>32</number>
    </property>
-   <property name="styleSheet">
-    <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(255, 0, 0);</string>
-   </property>
-   <property name="text">
-    <string>Delete</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="order_id_label">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>30</y>
-     <width>311</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">background-color: transparent;
-font-size:30px;
-text-decoration: underline;
-color: rgb(0, 0, 0);</string>
-   </property>
-   <property name="text">
-    <string>View order: 0000001</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="check_in_btn">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>500</y>
-     <width>111</width>
-     <height>81</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">QPushButton:hover {
-background-color: rgb(10, 123, 204);
-}
-QPushButton{
-	font: 18pt &quot;Calibri&quot;;
-border-radius:15px;
-border-radius:10px;
-color: rgb(255, 255, 255);
-border:2px solid  rgb(255, 255, 255);
-
-}
-</string>
-   </property>
-   <property name="text">
-    <string>Check-IN</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="customer_name_label">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>170</y>
-     <width>341</width>
-     <height>71</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">border-radius:15px;
-font-size:21px;
-background-color:rgba(13, 153, 255,0.4);
-color: rgb(255, 255, 255);
-
-border:2px solid  rgb(255, 255, 255);
-border-radius:10px;</string>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
-   </property>
-  </widget>
-  <widget class="QLabel" name="created_by_label">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>69</y>
-     <width>341</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">background-color: transparent;
-font-size:18px;
-text-decoration: underline;
-color: rgb(0, 0, 0);</string>
-   </property>
-   <property name="text">
-    <string>Order created by:</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QLabel" name="creation_date_label">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>90</y>
-     <width>341</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">background-color: transparent;
-font-size:18px;
-text-decoration: underline;
-color: rgb(0, 0, 0);</string>
-   </property>
-   <property name="text">
-    <string>Order creation date:</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QFrame" name="frame_7">
-   <property name="geometry">
-    <rect>
-     <x>230</x>
-     <y>260</y>
-     <width>131</width>
-     <height>71</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">.QFrame{
-background-color:rgba(13, 153, 255,0.4);
-border:3px solid  rgb(255, 255, 255);
-border-radius:5px;
-}</string>
-   </property>
-   <property name="frameShape">
-    <enum>QFrame::StyledPanel</enum>
-   </property>
-   <property name="frameShadow">
-    <enum>QFrame::Raised</enum>
-   </property>
-   <widget class="QLabel" name="label_9">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>15</y>
-      <width>61</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: transparent;
-font-size:23px;
-color: rgb(0, 0, 0);</string>
-    </property>
-    <property name="text">
-     <string>Pet</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
-   <widget class="QLabel" name="pet_label">
-    <property name="geometry">
-     <rect>
-      <x>70</x>
-      <y>10</y>
-      <width>51</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">border-radius:15px;
-font-size:18px;
-background-color:rgba(13, 153, 255,0.4);
-color: rgb(255, 255, 255);
-
-border:2px solid  rgb(255, 255, 255);
-border-radius:10px;</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="textFormat">
-     <enum>Qt::PlainText</enum>
-    </property>
-    <property name="pixmap">
-     <pixmap>../ICONS/unchecked.png</pixmap>
-    </property>
-    <property name="scaledContents">
-     <bool>true</bool>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
-  </widget>
-  <widget class="QFrame" name="frame_6">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>260</y>
-     <width>201</width>
-     <height>71</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">.QFrame{
-background-color:rgba(13, 153, 255,0.4);
-border:3px solid  rgb(255, 255, 255);
-border-radius:5px;
-}</string>
-   </property>
-   <property name="frameShape">
-    <enum>QFrame::StyledPanel</enum>
-   </property>
-   <property name="frameShadow">
-    <enum>QFrame::Raised</enum>
-   </property>
-   <widget class="QLabel" name="label_10">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>15</y>
-      <width>131</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: transparent;
-font-size:23px;
-color: rgb(0, 0, 0);</string>
-    </property>
-    <property name="text">
-     <string>Electric car</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
-   <widget class="QLabel" name="electric_car_label">
-    <property name="geometry">
-     <rect>
-      <x>140</x>
-      <y>10</y>
-      <width>51</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">border-radius:15px;
-font-size:18px;
-background-color:rgba(13, 153, 255,0.4);
-color: rgb(255, 255, 255);
-
-border:2px solid  rgb(255, 255, 255);
-border-radius:10px;</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="textFormat">
-     <enum>Qt::PlainText</enum>
-    </property>
-    <property name="pixmap">
-     <pixmap>../ICONS/unchecked.png</pixmap>
-    </property>
-    <property name="scaledContents">
-     <bool>true</bool>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
-  </widget>
-  <widget class="QFrame" name="guest_frame">
-   <property name="geometry">
-    <rect>
-     <x>390</x>
-     <y>170</y>
-     <width>271</width>
-     <height>71</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">.QFrame{
-background-color: rgb(13, 153, 255);
-border:3px solid  rgb(255, 255, 255);
-border-radius:5px;
-}</string>
-   </property>
-   <property name="frameShape">
-    <enum>QFrame::StyledPanel</enum>
-   </property>
-   <property name="frameShadow">
-    <enum>QFrame::Raised</enum>
-   </property>
-   <widget class="QFrame" name="adults_frame">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>5</y>
-      <width>141</width>
-      <height>61</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">border:noen;
-border-radius:0;
-</string>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::StyledPanel</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
-    </property>
-    <widget class="QLabel" name="label_3">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>10</y>
-       <width>71</width>
-       <height>41</height>
-      </rect>
+   <item>
+    <layout class="QVBoxLayout" name="header_layout">
+     <property name="spacing">
+      <number>2</number>
      </property>
-     <property name="styleSheet">
-      <string notr="true">background-color: transparent;
-font-size:23px;
-color: rgb(0, 0, 0);</string>
+     <item>
+      <widget class="QLabel" name="order_id_label">
+       <property name="text">
+        <string>View order: 0000001</string>
+       </property>
+       <property name="role" stdset="0">
+        <string>h2</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="meta_layout">
+       <property name="spacing">
+        <number>8</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="created_by_label">
+         <property name="text">
+          <string>Order created by:</string>
+         </property>
+         <property name="role" stdset="0">
+          <string>muted</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="meta_dot">
+         <property name="text">
+          <string>·</string>
+         </property>
+         <property name="role" stdset="0">
+          <string>muted</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="creation_date_label">
+         <property name="text">
+          <string>Order creation date:</string>
+         </property>
+         <property name="role" stdset="0">
+          <string>muted</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spacer_15">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="body_layout">
+     <property name="spacing">
+      <number>20</number>
      </property>
-     <property name="text">
-      <string>Adults</string>
-     </property>
-    </widget>
-    <widget class="QSpinBox" name="adults_label">
-     <property name="geometry">
-      <rect>
-       <x>90</x>
-       <y>10</y>
-       <width>41</width>
-       <height>41</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-color: transparent;
-font-size:20px;
-background-color:rgba(13, 153, 255,0.4);
-color: rgb(255, 255, 255);
-border:2px solid  rgb(255, 255, 255);
-border-radius:10px;
-
-
-</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="readOnly">
-      <bool>true</bool>
-     </property>
-     <property name="buttonSymbols">
-      <enum>QAbstractSpinBox::NoButtons</enum>
-     </property>
-     <property name="minimum">
-      <number>0</number>
-     </property>
-     <property name="maximum">
-      <number>10</number>
-     </property>
-     <property name="singleStep">
-      <number>1</number>
-     </property>
-     <property name="value">
-      <number>0</number>
-     </property>
-     <property name="displayIntegerBase">
-      <number>10</number>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QFrame" name="kids_frame">
-    <property name="geometry">
-     <rect>
-      <x>150</x>
-      <y>5</y>
-      <width>111</width>
-      <height>61</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">border:noen;
-border-radius:0;
-</string>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::StyledPanel</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
-    </property>
-    <widget class="QLabel" name="label_4">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>10</y>
-       <width>41</width>
-       <height>41</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-color: transparent;
-font-size:23px;
-color: rgb(0, 0, 0);</string>
-     </property>
-     <property name="text">
-      <string>Kids</string>
-     </property>
-    </widget>
-    <widget class="QSpinBox" name="kids_label">
-     <property name="geometry">
-      <rect>
-       <x>60</x>
-       <y>10</y>
-       <width>41</width>
-       <height>41</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-color: transparent;
-font-size:20px;
-background-color:rgba(13, 153, 255,0.4);
-color: rgb(255, 255, 255);
-border:2px solid  rgb(255, 255, 255);
-border-radius:10px;
-
-
-</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="readOnly">
-      <bool>true</bool>
-     </property>
-     <property name="buttonSymbols">
-      <enum>QAbstractSpinBox::NoButtons</enum>
-     </property>
-     <property name="minimum">
-      <number>0</number>
-     </property>
-     <property name="maximum">
-      <number>10</number>
-     </property>
-     <property name="value">
-      <number>0</number>
-     </property>
-     <property name="displayIntegerBase">
-      <number>10</number>
-     </property>
-    </widget>
-   </widget>
-  </widget>
-  <widget class="QFrame" name="frame_8">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>350</y>
-     <width>201</width>
-     <height>71</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">.QFrame{
-background-color:rgba(13, 153, 255,0.4);
-border:3px solid  rgb(255, 255, 255);
-border-radius:5px;
-}</string>
-   </property>
-   <property name="frameShape">
-    <enum>QFrame::StyledPanel</enum>
-   </property>
-   <property name="frameShadow">
-    <enum>QFrame::Raised</enum>
-   </property>
-   <widget class="QLabel" name="label_13">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>15</y>
-      <width>131</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: transparent;
-font-size:23px;
-color: rgb(0, 0, 0);</string>
-    </property>
-    <property name="text">
-     <string>Breakfast</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
-   <widget class="QLabel" name="breakfast_label">
-    <property name="geometry">
-     <rect>
-      <x>140</x>
-      <y>10</y>
-      <width>51</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">border-radius:15px;
-font-size:18px;
-background-color:rgba(13, 153, 255,0.4);
-color: rgb(255, 255, 255);
-
-border:2px solid  rgb(255, 255, 255);
-border-radius:10px;</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="textFormat">
-     <enum>Qt::PlainText</enum>
-    </property>
-    <property name="pixmap">
-     <pixmap>../ICONS/unchecked.png</pixmap>
-    </property>
-    <property name="scaledContents">
-     <bool>true</bool>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
-  </widget>
-  <widget class="QFrame" name="frame_9">
-   <property name="geometry">
-    <rect>
-     <x>230</x>
-     <y>350</y>
-     <width>201</width>
-     <height>71</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">.QFrame{
-background-color:rgba(13, 153, 255,0.4);
-border:3px solid  rgb(255, 255, 255);
-border-radius:5px;
-}</string>
-   </property>
-   <property name="frameShape">
-    <enum>QFrame::StyledPanel</enum>
-   </property>
-   <property name="frameShadow">
-    <enum>QFrame::Raised</enum>
-   </property>
-   <widget class="QLabel" name="label_17">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>15</y>
-      <width>131</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: transparent;
-font-size:23px;
-color: rgb(0, 0, 0);</string>
-    </property>
-    <property name="text">
-     <string>Lunch</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
-   <widget class="QLabel" name="lunch_label">
-    <property name="geometry">
-     <rect>
-      <x>140</x>
-      <y>10</y>
-      <width>51</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">border-radius:15px;
-font-size:18px;
-background-color:rgba(13, 153, 255,0.4);
-color: rgb(255, 255, 255);
-
-border:2px solid  rgb(255, 255, 255);
-border-radius:10px;</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="textFormat">
-     <enum>Qt::PlainText</enum>
-    </property>
-    <property name="pixmap">
-     <pixmap>../ICONS/unchecked.png</pixmap>
-    </property>
-    <property name="scaledContents">
-     <bool>true</bool>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
-  </widget>
-  <widget class="QFrame" name="frame_10">
-   <property name="geometry">
-    <rect>
-     <x>440</x>
-     <y>350</y>
-     <width>201</width>
-     <height>71</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">.QFrame{
-background-color:rgba(13, 153, 255,0.4);
-border:3px solid  rgb(255, 255, 255);
-border-radius:5px;
-}</string>
-   </property>
-   <property name="frameShape">
-    <enum>QFrame::StyledPanel</enum>
-   </property>
-   <property name="frameShadow">
-    <enum>QFrame::Raised</enum>
-   </property>
-   <widget class="QLabel" name="label_19">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>15</y>
-      <width>131</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: transparent;
-font-size:23px;
-color: rgb(0, 0, 0);</string>
-    </property>
-    <property name="text">
-     <string>Dinner</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
-   <widget class="QLabel" name="dinner_label">
-    <property name="geometry">
-     <rect>
-      <x>140</x>
-      <y>10</y>
-      <width>51</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">border-radius:15px;
-font-size:18px;
-background-color:rgba(13, 153, 255,0.4);
-color: rgb(255, 255, 255);
-
-border:2px solid  rgb(255, 255, 255);
-border-radius:10px;</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="textFormat">
-     <enum>Qt::PlainText</enum>
-    </property>
-    <property name="pixmap">
-     <pixmap>../ICONS/unchecked.png</pixmap>
-    </property>
-    <property name="scaledContents">
-     <bool>true</bool>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
-  </widget>
-  <widget class="QLabel" name="label">
-   <property name="geometry">
-    <rect>
-     <x>390</x>
-     <y>250</y>
-     <width>71</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">font: 14pt &quot;Calibri&quot;;
-</string>
-   </property>
-   <property name="text">
-    <string>Arrival</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>550</x>
-     <y>250</y>
-     <width>71</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">font: 14pt &quot;Calibri&quot;;
-</string>
-   </property>
-   <property name="text">
-    <string>leaving</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
-   </property>
-  </widget>
-  <widget class="QLabel" name="arrivel_label">
-   <property name="geometry">
-    <rect>
-     <x>380</x>
-     <y>270</y>
-     <width>141</width>
-     <height>61</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">border-radius:15px;
-font-size:18px;
-background-color:rgba(13, 153, 255,0.4);
-color: rgb(255, 255, 255);
-
-border:2px solid  rgb(255, 255, 255);
-border-radius:10px;</string>
-   </property>
-   <property name="text">
-    <string>02/03/2023</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
-   </property>
-  </widget>
-  <widget class="QLabel" name="leaving_label">
-   <property name="geometry">
-    <rect>
-     <x>540</x>
-     <y>270</y>
-     <width>141</width>
-     <height>61</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">border-radius:15px;
-font-size:18px;
-background-color:rgba(13, 153, 255,0.4);
-color: rgb(255, 255, 255);
-
-border:2px solid  rgb(255, 255, 255);
-border-radius:10px;</string>
-   </property>
-   <property name="text">
-    <string>02/03/2023</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="check_out_btn">
-   <property name="geometry">
-    <rect>
-     <x>140</x>
-     <y>500</y>
-     <width>121</width>
-     <height>81</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">QPushButton:hover {
-background-color: rgb(10, 123, 204);
-}
-QPushButton{
-	font: 18pt &quot;Calibri&quot;;
-border-radius:15px;
-border-radius:10px;
-color: rgb(255, 255, 255);
-border:2px solid  rgb(255, 255, 255);
-
-}
-</string>
-   </property>
-   <property name="text">
-    <string>Check-OUT</string>
-   </property>
-  </widget>
+     <item>
+      <layout class="QVBoxLayout" name="left_column">
+       <property name="spacing">
+        <number>20</number>
+       </property>
+       <item>
+        <widget class="QFrame" name="details_card">
+         <property name="card" stdset="0">
+          <string>true</string>
+         </property>
+         <layout class="QVBoxLayout" name="details_layout">
+          <property name="spacing">
+           <number>8</number>
+          </property>
+          <property name="leftMargin">
+           <number>28</number>
+          </property>
+          <property name="topMargin">
+           <number>28</number>
+          </property>
+          <property name="rightMargin">
+           <number>28</number>
+          </property>
+          <property name="bottomMargin">
+           <number>28</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="details_heading">
+            <property name="text">
+             <string>Guest &amp; stay</string>
+            </property>
+            <property name="role" stdset="0">
+             <string>h2</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="spacer_1">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>6</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="details_grid"><property name="horizontalSpacing"><number>64</number></property>
+            <property name="spacing">
+             <number>22</number>
+            </property>
+            <item row="0" column="0">
+             <layout class="QVBoxLayout" name="name_field">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="label_5">
+                <property name="text">
+                 <string>CUSTOMER NAME</string>
+                </property>
+                <property name="role" stdset="0">
+                 <string>caption</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="customer_name_label">
+                <property name="text">
+                 <string>Customer name: </string>
+                </property>
+                <property name="role" stdset="0">
+                 <string>value</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="0" column="1">
+             <layout class="QVBoxLayout" name="guests_field">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="label_6">
+                <property name="text">
+                 <string>GUESTS</string>
+                </property>
+                <property name="role" stdset="0">
+                 <string>caption</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="guests_values">
+                <item>
+                 <widget class="QFrame" name="guest_frame">
+                  <layout class="QHBoxLayout" name="guest_frame_layout">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
+                   <property name="leftMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="QFrame" name="adults_frame">
+                     <layout class="QHBoxLayout" name="adults_layout">
+                      <property name="spacing">
+                       <number>4</number>
+                      </property>
+                      <property name="leftMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="topMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="rightMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="bottomMargin">
+                       <number>0</number>
+                      </property>
+                      <item>
+                       <widget class="QSpinBox" name="adults_label">
+                        <property name="readOnly">
+                         <bool>true</bool>
+                        </property>
+                        <property name="buttonSymbols">
+                         <enum>QAbstractSpinBox::NoButtons</enum>
+                        </property>
+                        <property name="minimum">
+                         <number>0</number>
+                        </property>
+                        <property name="maximum">
+                         <number>10</number>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>60</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="focusPolicy">
+                         <enum>Qt::NoFocus</enum>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QLabel" name="label_3">
+                        <property name="text">
+                         <string>adults</string>
+                        </property>
+                        <property name="role" stdset="0">
+                         <string>muted</string>
+                        </property>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
+                   </item>
+                   <item>
+                    <spacer name="spacer_2">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                     <property name="sizeType">
+                      <enum>QSizePolicy::Fixed</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>18</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                   <item>
+                    <widget class="QFrame" name="kids_frame">
+                     <layout class="QHBoxLayout" name="kids_layout">
+                      <property name="spacing">
+                       <number>4</number>
+                      </property>
+                      <property name="leftMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="topMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="rightMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="bottomMargin">
+                       <number>0</number>
+                      </property>
+                      <item>
+                       <widget class="QSpinBox" name="kids_label">
+                        <property name="readOnly">
+                         <bool>true</bool>
+                        </property>
+                        <property name="buttonSymbols">
+                         <enum>QAbstractSpinBox::NoButtons</enum>
+                        </property>
+                        <property name="minimum">
+                         <number>0</number>
+                        </property>
+                        <property name="maximum">
+                         <number>10</number>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>60</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="focusPolicy">
+                         <enum>Qt::NoFocus</enum>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QLabel" name="label_4">
+                        <property name="text">
+                         <string>kids</string>
+                        </property>
+                        <property name="role" stdset="0">
+                         <string>muted</string>
+                        </property>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
+                   </item>
+                   <item>
+                    <spacer name="spacer_3">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>40</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="0">
+             <layout class="QVBoxLayout" name="arrival_field">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="label">
+                <property name="text">
+                 <string>ARRIVAL</string>
+                </property>
+                <property name="role" stdset="0">
+                 <string>caption</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="arrivel_label">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="role" stdset="0">
+                 <string>value</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="1">
+             <layout class="QVBoxLayout" name="leaving_field">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="label_2">
+                <property name="text">
+                 <string>LEAVING</string>
+                </property>
+                <property name="role" stdset="0">
+                 <string>caption</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="leaving_label">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="role" stdset="0">
+                 <string>value</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="0" column="2">
+             <spacer name="spacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="services_card">
+         <property name="card" stdset="0">
+          <string>true</string>
+         </property>
+         <layout class="QVBoxLayout" name="services_layout">
+          <property name="spacing">
+           <number>8</number>
+          </property>
+          <property name="leftMargin">
+           <number>28</number>
+          </property>
+          <property name="topMargin">
+           <number>28</number>
+          </property>
+          <property name="rightMargin">
+           <number>28</number>
+          </property>
+          <property name="bottomMargin">
+           <number>28</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="services_heading">
+            <property name="text">
+             <string>Meals &amp; extras</string>
+            </property>
+            <property name="role" stdset="0">
+             <string>h2</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="spacer_5">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>6</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="services_grid">
+            <property name="spacing">
+             <number>12</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QFrame" name="frame_8">
+              <property name="card" stdset="0">
+               <string>inner</string>
+              </property>
+              <layout class="QHBoxLayout" name="frame_8_layout">
+               <property name="spacing">
+                <number>10</number>
+               </property>
+               <property name="leftMargin">
+                <number>14</number>
+               </property>
+               <property name="topMargin">
+                <number>12</number>
+               </property>
+               <property name="rightMargin">
+                <number>14</number>
+               </property>
+               <property name="bottomMargin">
+                <number>12</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="breakfast_label">
+                 <property name="minimumSize">
+                  <size>
+                   <width>22</width>
+                   <height>22</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>22</width>
+                   <height>22</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_13">
+                 <property name="text">
+                  <string>Breakfast</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="spacer_6">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QFrame" name="frame_9">
+              <property name="card" stdset="0">
+               <string>inner</string>
+              </property>
+              <layout class="QHBoxLayout" name="frame_9_layout">
+               <property name="spacing">
+                <number>10</number>
+               </property>
+               <property name="leftMargin">
+                <number>14</number>
+               </property>
+               <property name="topMargin">
+                <number>12</number>
+               </property>
+               <property name="rightMargin">
+                <number>14</number>
+               </property>
+               <property name="bottomMargin">
+                <number>12</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="lunch_label">
+                 <property name="minimumSize">
+                  <size>
+                   <width>22</width>
+                   <height>22</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>22</width>
+                   <height>22</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_17">
+                 <property name="text">
+                  <string>Lunch</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="spacer_7">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QFrame" name="frame_10">
+              <property name="card" stdset="0">
+               <string>inner</string>
+              </property>
+              <layout class="QHBoxLayout" name="frame_10_layout">
+               <property name="spacing">
+                <number>10</number>
+               </property>
+               <property name="leftMargin">
+                <number>14</number>
+               </property>
+               <property name="topMargin">
+                <number>12</number>
+               </property>
+               <property name="rightMargin">
+                <number>14</number>
+               </property>
+               <property name="bottomMargin">
+                <number>12</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="dinner_label">
+                 <property name="minimumSize">
+                  <size>
+                   <width>22</width>
+                   <height>22</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>22</width>
+                   <height>22</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_19">
+                 <property name="text">
+                  <string>Dinner</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="spacer_8">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QFrame" name="frame_6">
+              <property name="card" stdset="0">
+               <string>inner</string>
+              </property>
+              <layout class="QHBoxLayout" name="frame_6_layout">
+               <property name="spacing">
+                <number>10</number>
+               </property>
+               <property name="leftMargin">
+                <number>14</number>
+               </property>
+               <property name="topMargin">
+                <number>12</number>
+               </property>
+               <property name="rightMargin">
+                <number>14</number>
+               </property>
+               <property name="bottomMargin">
+                <number>12</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="electric_car_label">
+                 <property name="minimumSize">
+                  <size>
+                   <width>22</width>
+                   <height>22</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>22</width>
+                   <height>22</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_10">
+                 <property name="text">
+                  <string>Electric car</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="spacer_9">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QFrame" name="frame_7">
+              <property name="card" stdset="0">
+               <string>inner</string>
+              </property>
+              <layout class="QHBoxLayout" name="frame_7_layout">
+               <property name="spacing">
+                <number>10</number>
+               </property>
+               <property name="leftMargin">
+                <number>14</number>
+               </property>
+               <property name="topMargin">
+                <number>12</number>
+               </property>
+               <property name="rightMargin">
+                <number>14</number>
+               </property>
+               <property name="bottomMargin">
+                <number>12</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="pet_label">
+                 <property name="minimumSize">
+                  <size>
+                   <width>22</width>
+                   <height>22</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>22</width>
+                   <height>22</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_9">
+                 <property name="text">
+                  <string>Pet</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="spacer_10">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spacer_16">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QFrame" name="actions_card">
+       <property name="card" stdset="0">
+        <string>true</string>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>290</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>290</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <layout class="QVBoxLayout" name="actions_layout">
+        <property name="spacing">
+         <number>10</number>
+        </property>
+        <property name="leftMargin">
+         <number>24</number>
+        </property>
+        <property name="topMargin">
+         <number>24</number>
+        </property>
+        <property name="rightMargin">
+         <number>24</number>
+        </property>
+        <property name="bottomMargin">
+         <number>24</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="actions_heading">
+          <property name="text">
+           <string>Guest status</string>
+          </property>
+          <property name="role" stdset="0">
+           <string>h2</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="actions_hint">
+          <property name="text">
+           <string>Mark when the guest arrives and leaves</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+          <property name="role" stdset="0">
+           <string>muted</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="spacer_11">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>4</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="check_in_btn">
+          <property name="text">
+           <string>  Check-in</string>
+          </property>
+          <property name="cursor">
+           <cursorShape>PointingHandCursor</cursorShape>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+          <property name="variant" stdset="0">
+           <string>chip</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="check_out_btn">
+          <property name="text">
+           <string>  Check-out</string>
+          </property>
+          <property name="cursor">
+           <cursorShape>PointingHandCursor</cursorShape>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+          <property name="variant" stdset="0">
+           <string>chip</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="spacer_12">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>14</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="manage_heading">
+          <property name="text">
+           <string>Manage order</string>
+          </property>
+          <property name="role" stdset="0">
+           <string>h2</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="spacer_13">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>4</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="update_btn">
+          <property name="text">
+           <string>  Edit order</string>
+          </property>
+          <property name="cursor">
+           <cursorShape>PointingHandCursor</cursorShape>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+          <property name="variant" stdset="0">
+           <string>primary</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="delete_btn">
+          <property name="text">
+           <string>  Delete order</string>
+          </property>
+          <property name="cursor">
+           <cursorShape>PointingHandCursor</cursorShape>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+          <property name="variant" stdset="0">
+           <string>danger</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="spacer_14">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="home_btn">
+          <property name="text">
+           <string>  Back to dashboard</string>
+          </property>
+          <property name="cursor">
+           <cursorShape>PointingHandCursor</cursorShape>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+          <property name="variant" stdset="0">
+           <string>ghost</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>

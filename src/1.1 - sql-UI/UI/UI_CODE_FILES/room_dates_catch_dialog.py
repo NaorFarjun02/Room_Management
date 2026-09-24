@@ -1,10 +1,11 @@
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtWidgets import QWidget, QFrame, QLabel,QDialog
+from PyQt5.QtWidgets import QWidget, QFrame, QLabel,QDialog, QHBoxLayout
 from PyQt5.uic import loadUi
 
 from models import *
+from UI import theme
 
 
 class Dates_Catch_Dialog(QDialog):
@@ -26,28 +27,31 @@ class Dates_Catch_Dialog(QDialog):
 	def create_date_frame(self,date):
 		dates_frame = QFrame(self)
 		dates_frame.setObjectName(u"dates_frame")
-		dates_frame.setFixedHeight(40)
-		dates_frame.setFixedWidth(350)
-		dates_frame.setGeometry(10, 10, 350, 40)
-		dates_frame.setStyleSheet(u"background-color: rgb(141, 193, 231)")
+		dates_frame.setProperty("listitem", "true")
+		layout = QHBoxLayout(dates_frame)
+		layout.setContentsMargins(16, 12, 16, 12)
+		layout.setSpacing(12)
+
+		calendar_icon = QLabel(dates_frame)
+		calendar_icon.setPixmap(theme.pixmap("calendar", theme.COLORS["accent"], 20))
+		layout.addWidget(calendar_icon)
 
 		start_date_label = QLabel(dates_frame)
 		start_date_label.setObjectName(u"start_date_label")
-		start_date_label.setGeometry(10, 10, 130, 20)
 		start_date_label.setText(date[0])
-		start_date_label.setStyleSheet(u"font: 19pt \"Calibri\";")
-
-		end_date_label = QLabel(dates_frame)
-		end_date_label.setObjectName(u"end_date_label")
-		end_date_label.setGeometry(190, 10, 130, 20)
-		end_date_label.setText(date[1])
-		end_date_label.setStyleSheet(u"font: 19pt \"Calibri\";")
+		start_date_label.setProperty("role", "value")
+		layout.addWidget(start_date_label)
 
 		to_label = QLabel(dates_frame)
 		to_label.setObjectName(u"to_label")
-		to_label.setGeometry(150, 10, 30, 20)
-		to_label.setText("To")
-		to_label.setStyleSheet(u"font: 18pt \"Calibri\";")
-		to_label.setAlignment(Qt.AlignCenter)
+		to_label.setPixmap(theme.pixmap("arrow_right", theme.COLORS["text_faint"], 16))
+		layout.addWidget(to_label)
+
+		end_date_label = QLabel(dates_frame)
+		end_date_label.setObjectName(u"end_date_label")
+		end_date_label.setText(date[1])
+		end_date_label.setProperty("role", "value")
+		layout.addWidget(end_date_label)
+		layout.addStretch()
 
 		return dates_frame

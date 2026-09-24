@@ -6,118 +6,163 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>246</width>
-    <height>263</height>
+    <width>420</width>
+    <height>260</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Add room</string>
   </property>
-  <widget class="QSpinBox" name="capacity_input">
-   <property name="geometry">
-    <rect>
-     <x>100</x>
-     <y>90</y>
-     <width>51</width>
-     <height>51</height>
-    </rect>
+  <layout class="QVBoxLayout" name="dialog_layout">
+   <property name="spacing">
+    <number>8</number>
    </property>
-   <property name="styleSheet">
-    <string notr="true">background-color: transparent;
-font-size:30px;
-background-color:rgba(13, 153, 255,0.4);
-color: rgb(255, 255, 255);
-border:2px solid  rgb(255, 255, 255);
-border-radius:10px;
-
-
-</string>
+   <property name="leftMargin">
+    <number>28</number>
    </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
+   <property name="topMargin">
+    <number>24</number>
    </property>
-   <property name="buttonSymbols">
-    <enum>QAbstractSpinBox::NoButtons</enum>
+   <property name="rightMargin">
+    <number>28</number>
    </property>
-   <property name="showGroupSeparator" stdset="0">
-    <bool>false</bool>
+   <property name="bottomMargin">
+    <number>24</number>
    </property>
-   <property name="minimum">
-    <number>2</number>
-   </property>
-   <property name="maximum">
-    <number>12</number>
-   </property>
-   <property name="singleStep">
-    <number>1</number>
-   </property>
-   <property name="value">
-    <number>2</number>
-   </property>
-   <property name="displayIntegerBase">
-    <number>10</number>
-   </property>
-  </widget>
-  <widget class="QLabel" name="title_label">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>20</y>
-     <width>211</width>
-     <height>51</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">background-color: rgb(13, 153, 255);
-border-radius:20px;
-font-size:18px;
-</string>
-   </property>
-   <property name="text">
-    <string>Enter new room capacity</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="cencel_btn">
-   <property name="geometry">
-    <rect>
-     <x>70</x>
-     <y>200</y>
-     <width>111</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">background-color: rgb(13, 153, 255);
-border-radius:20px;
-font-size:15px;
-</string>
-   </property>
-   <property name="text">
-    <string>Cencel</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="add_room_btn">
-   <property name="geometry">
-    <rect>
-     <x>70</x>
-     <y>150</y>
-     <width>111</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">background-color: rgb(13, 153, 255);
-border-radius:20px;
-font-size:15px;
-</string>
-   </property>
-   <property name="text">
-    <string>Add</string>
-   </property>
-  </widget>
+   <item>
+    <widget class="QLabel" name="title_label">
+     <property name="text">
+      <string>Add a new room</string>
+     </property>
+     <property name="role" stdset="0">
+      <string>h2</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="subtitle_label">
+     <property name="text">
+      <string>How many guests can sleep in the room? (2 - 12)</string>
+     </property>
+     <property name="role" stdset="0">
+      <string>muted</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="spacer_1">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>8</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QLabel" name="capacity_caption">
+     <property name="text">
+      <string>ROOM CAPACITY</string>
+     </property>
+     <property name="role" stdset="0">
+      <string>caption</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QSpinBox" name="capacity_input">
+     <property name="minimum">
+      <number>2</number>
+     </property>
+     <property name="maximum">
+      <number>12</number>
+     </property>
+     <property name="value">
+      <number>2</number>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>140</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="spacer_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>12</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="buttons_layout">
+     <property name="spacing">
+      <number>10</number>
+     </property>
+     <item>
+      <spacer name="spacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cencel_btn">
+       <property name="text">
+        <string>Cancel</string>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="add_room_btn">
+       <property name="text">
+        <string>Add room</string>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="variant" stdset="0">
+        <string>primary</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>

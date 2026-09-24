@@ -4,6 +4,8 @@ from PyQt5.uic import loadUi
 
 from models import *
 from models.dialogs.dialog_msg import MSG_Dialog
+from PyQt5.QtCore import QSize
+from UI import theme
 
 class View_Order_Widget(QWidget):
     def __init__(self, widget):
@@ -21,6 +23,15 @@ class View_Order_Widget(QWidget):
         self.delete_btn.clicked.connect(self.delete_order)
         self.update_btn.clicked.connect(self.update_order)
         self.home_btn.clicked.connect(self.home)
+
+        buttons_icons = [(self.check_in_btn, "check_in", theme.COLORS["accent"]),
+                         (self.check_out_btn, "check_out", theme.COLORS["accent"]),
+                         (self.update_btn, "edit", "#FFFFFF"),
+                         (self.delete_btn, "trash", theme.COLORS["danger"]),
+                         (self.home_btn, "arrow_left", theme.COLORS["text_muted"])]
+        for btn, icon_name, color in buttons_icons:
+            btn.setIcon(theme.icon(icon_name, color, 18))
+            btn.setIconSize(QSize(18, 18))
 
     def check_in_order(self):
         """
@@ -91,21 +102,7 @@ class View_Order_Widget(QWidget):
         """
         Change the color of the button depend on his status (click/unclick)
         """
-        style = """
-					QPushButton:hover {
-						background-color: rgb(10, 123, 204);
-					}
-					QPushButton{
-						font: 18pt "Calibri";
-						border-radius:15px;
-						border-radius:10px;
-						color: rgb(255, 255, 255);
-						border:2px solid  rgb(255, 255, 255);
-				"""  # the basic style for the button
-        if status:
-            style += """	background: rgb(10, 123, 204);	"""  # add background color when the status is true
-        style += """	}	"""  # close style
-        btn.setStyleSheet(style)  # set the style sheet for the button
+        theme.set_selected(btn, status)  # selected look when the status is true
 
     def delete_order(self):
         """
@@ -138,10 +135,10 @@ class View_Order_Widget(QWidget):
         """
         Clear the UI object -> set the text to defualt
         """
-        self.order_id_label.setText("View order: ")
+        self.order_id_label.setText("Order")
         self.created_by_label.setText("Order created by:")
         self.creation_date_label.setText("Order creation date: ")
-        self.customer_name_label.setText("Customer name: ")
+        self.customer_name_label.setText("")
         self.adults_label.setValue(0)
         self.arrivel_label.setText("")
         self.leaving_label.setText("")
@@ -151,7 +148,7 @@ class View_Order_Widget(QWidget):
                                self.lunch_label,
                                self.dinner_label]
         for label in order_widget_labels:
-            label.setPixmap(QPixmap('UI/ICONS/unchecked.png'))
+            label.setPixmap(theme.status_pixmap(False))
 
     def display_order(self):
         """
@@ -161,23 +158,20 @@ class View_Order_Widget(QWidget):
         orders_dates = get_start_and_end_dates(self.order_id)
         print(order)
         print(orders_dates)
-        self.order_id_label.setText(f"View order: {order[0]}")
+        self.order_id_label.setText(f"Order #{str(order[0]).zfill(8)}")
         self.created_by_label.setText(f"Order created by: {order[12]}")
         self.creation_date_label.setText(f"Order creation date: {order[11]}")
-        self.customer_name_label.setText(f"Customer name: {order[1]}")
+        self.customer_name_label.setText(f"{order[1]}")
         self.adults_label.setValue(order[2])
         self.arrivel_label.setText(f"{orders_dates[0]}")
-        self.leaving_label.setText(f"{orders_dates[0]}")
+        self.leaving_label.setText(f"{orders_dates[1]}")
         order_vars_and_widget_labels = [(order[7], self.electric_car_label),
                                         (order[8], self.pet_label),
                                         (order[4], self.breakfast_label),
                                         (order[5], self.lunch_label),
                                         (order[6], self.dinner_label)]
         for order_stat in order_vars_and_widget_labels:
-            if order_stat[0] == True:
-                order_stat[1].setPixmap(QPixmap('UI/ICONS/checked.png'))
-            else:
-                order_stat[1].setPixmap(QPixmap('UI/ICONS/unchecked.png'))
+            order_stat[1].setPixmap(theme.status_pixmap(order_stat[0] == True))  # green check / grey dash
 
     def set_order_to_display(self, order_id=-1):
         """

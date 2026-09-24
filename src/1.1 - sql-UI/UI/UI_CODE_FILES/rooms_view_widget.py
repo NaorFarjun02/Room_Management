@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtWidgets import QWidget, QFrame, QLabel, QPushButton
+from PyQt5.QtWidgets import QWidget, QFrame, QLabel, QPushButton, QHBoxLayout
 from PyQt5.uic import loadUi
 
 from models import *
@@ -11,6 +11,10 @@ from .room_dates_catch_dialog import Dates_Catch_Dialog
 from .room_faults_dialog import Faults_Dialog
 from .new_room_dialog import New_Room_Dialog
 from .new_room_fault_dialog import New_Fault_Dialog
+from .components import cell, pill_holder
+from UI import theme
+
+COLUMNS_WIDTH = [120, 110, 150, 160, 130, 150]  # room, capacity, status, cleaning, faults, dates
 
 class Room_View_Widget(QWidget):
 
@@ -20,7 +24,10 @@ class Room_View_Widget(QWidget):
         loadUi("UI/UI_Files/rooms_view_widget.ui", self)  # load the UI of the page
         self.widget = widget  # the widget-stack that has all widgets --> so I can move to any other widget
 
-        self.rooms_widget.addWidget(self.create_titles_frame())
+        self.table_header_layout.addWidget(self.create_titles_frame())  # the header stays on top while the rows scroll
+        self.new_room_btn.setIcon(theme.icon("plus", "#FFFFFF", 16))
+        self.new_fault_btn.setIcon(theme.icon("wrench", theme.COLORS["text"], 16))
+        self.home_btn.setIcon(theme.icon("arrow_left", theme.COLORS["text_muted"], 16))
         self.home_btn.clicked.connect(self.home)
         self.new_room_btn.clicked.connect(self.new_room)
         self.new_fault_btn.clicked.connect(self.new_fault)
@@ -52,7 +59,7 @@ class Room_View_Widget(QWidget):
         self.refresh_rooms_status()
     def clear_rooms_table(self):
 
-        for i in reversed(range(1, self.rooms_widget.count())):
+        for i in reversed(range(self.rooms_widget.count())):
             self.rooms_widget.itemAt(i).widget().setParent(None)
 
     def refresh_rooms_status(self):
@@ -61,190 +68,91 @@ class Room_View_Widget(QWidget):
             rooms = get_rooms_from_db()
             for r in rooms:
                 self.rooms_widget.addWidget(self.create_room_frame(r))
+            self.rooms_count_label.setText(f"{len(rooms)} rooms  ·  {sum(1 for r in rooms if not r[2])} available now")
+            if len(rooms) == 0:
+                empty_label = cell("No rooms yet - use \"Add room\" to create the first one", role="muted")
+                empty_label.setAlignment(Qt.AlignCenter)
+                empty_label.setMinimumHeight(120)
+                self.rooms_widget.addWidget(empty_label)
         except Exception as e:
             print(e)
 
+    def row_layout(self, frame):
+        """same margins / spacing for the header and for every room row so the columns line up"""
+        layout = QHBoxLayout(frame)
+        layout.setContentsMargins(24, 0, 16, 0)
+        layout.setSpacing(12)
+        return layout
+
     def create_titles_frame(self):
-
-        title_style = ("border-radius:15px;\n"
-
-                       "font-size:21px;\n"
-
-                       "background-color:rgba(13, 153, 255,0.4);\n"
-
-                       "color: rgb(255, 255, 255);\n"
-
-                       "\n"
-
-                       "border:2px solid  rgb(255, 255, 255);\n"
-
-                       "border-radius:10px;")
-
         frame_titles = QFrame(self)
-        frame_titles.setFixedHeight(70)
-        frame_titles.setFixedWidth(1280)
-        number_title = QLabel(self)
-        number_title.setGeometry(0, 10, 150, 50)
-
-        number_title.setStyleSheet(title_style)
-
-        number_title.setText("Room number")
-
-        number_title.setObjectName("number_title")
-
-        number_title.setParent(frame_titles)
-
-        number_title.setAlignment(Qt.AlignCenter)
-
-        capacity_title = QtWidgets.QLabel(self)
-
-        capacity_title.setGeometry(170, 10, 150, 50)
-
-        capacity_title.setStyleSheet(title_style)
-
-        capacity_title.setText("Room capacity")
-
-        capacity_title.setObjectName("capacity_title")
-
-        capacity_title.setParent(frame_titles)
-
-        capacity_title.setAlignment(Qt.AlignCenter)
-
-        now_status_title = QtWidgets.QLabel(self)
-
-        now_status_title.setGeometry(350, 10, 200, 50)
-
-        now_status_title.setStyleSheet(title_style)
-
-        now_status_title.setText("Room status(NOW)")
-
-        now_status_title.setObjectName("now_status_title")
-
-        now_status_title.setParent(frame_titles)
-
-        now_status_title.setAlignment(Qt.AlignCenter)
-
-        cleanning_status_title = QtWidgets.QLabel(self)
-
-        cleanning_status_title.setGeometry(580, 10, 230, 50)
-
-        cleanning_status_title.setStyleSheet(title_style)
-
-        cleanning_status_title.setText("Room cleanning satus")
-
-        cleanning_status_title.setObjectName("cleanning_status_title")
-
-        cleanning_status_title.setParent(frame_titles)
-
-        cleanning_status_title.setAlignment(Qt.AlignCenter)
-
-        faults_title = QtWidgets.QLabel(self)
-
-        faults_title.setGeometry(840, 10, 130, 50)
-
-        faults_title.setStyleSheet(title_style)
-
-        faults_title.setText("Room faults")
-
-        faults_title.setObjectName("faults_title")
-
-        faults_title.setParent(frame_titles)
-
-        faults_title.setAlignment(Qt.AlignCenter)
-
-        dates_catch_title = QtWidgets.QLabel(self)
-
-        dates_catch_title.setGeometry(1000, 10, 240, 50)
-
-        dates_catch_title.setStyleSheet(title_style)
-
-        dates_catch_title.setText("Dates the room is catch")
-
-        dates_catch_title.setObjectName("dates_catch_title")
-
-        dates_catch_title.setParent(frame_titles)
-
-        dates_catch_title.setAlignment(Qt.AlignCenter)
-
+        frame_titles.setObjectName("table_header")
+        frame_titles.setFixedHeight(46)
+        layout = self.row_layout(frame_titles)
+        for title, width in zip(["ROOM", "CAPACITY", "STATUS (NOW)", "CLEANING", "FAULTS", "BOOKED DATES"], COLUMNS_WIDTH):
+            layout.addWidget(cell(title, width))
+        layout.addStretch()
+        layout.addSpacing(34)  # the delete button column
         return frame_titles
 
     def create_room_frame(self, room=None):
         if room is None:
             return None
-        feild_style = ("border-radius:15px;\n"
-                       "font-size:21px;\n"
-                       "background-color:rgb(48, 120, 200);\n"
-                       "color: rgb(255, 255, 255);\n"
-                       "\n"
-                       "border:2px solid  rgb(255, 255, 255);\n"
-                       "border-radius:10px;")
-
+        # room = (room_number, room_capacity, room_is_catch, room_is_clean)
         room_frame = QFrame(self)
-        room_frame.setFixedHeight(60)
-        room_frame.setFixedWidth(1280)
+        room_frame.setProperty("row", "true")
+        room_frame.setFixedHeight(64)
+        layout = self.row_layout(room_frame)
 
-        number_room = QLabel(room_frame)
-        number_room.setGeometry(0, 0, 150, 50)
-        number_room.setStyleSheet(feild_style)
-        number_room.setText(str(room[0]))
-        number_room.setObjectName("room_number")
-        number_room.setAlignment(Qt.AlignCenter)
+        layout.addWidget(cell(f"Room {room[0]}", COLUMNS_WIDTH[0], "cell_strong"))
+        layout.addWidget(cell(f"{room[1]} guests", COLUMNS_WIDTH[1]))
+        if room[2]:
+            layout.addWidget(pill_holder("Occupied", "info", COLUMNS_WIDTH[2]))
+        else:
+            layout.addWidget(pill_holder("Available", "success", COLUMNS_WIDTH[2]))
+        if room[3]:
+            layout.addWidget(pill_holder("Clean", "success", COLUMNS_WIDTH[3]))
+        else:
+            layout.addWidget(pill_holder("Needs cleaning", "warning", COLUMNS_WIDTH[3]))
 
-        capacity_room = QLabel(room_frame)
-        capacity_room.setGeometry(170, 0, 150, 50)
-        capacity_room.setStyleSheet(feild_style)
-        capacity_room.setText(str(room[1]))
-        capacity_room.setObjectName("room_capacity")
-        capacity_room.setAlignment(Qt.AlignCenter)
-
-        now_status_room = QLabel(room_frame)
-        now_status_room.setGeometry(350, 0, 200, 50)
-        now_status_room.setStyleSheet(feild_style)
-        now_status_room.setText(str(room[2]))
-        now_status_room.setObjectName("room_now_status")
-        now_status_room.setAlignment(Qt.AlignCenter)
-
-        cleanning_status_room = QLabel(room_frame)
-        cleanning_status_room.setGeometry(580, 0, 230, 50)
-        cleanning_status_room.setStyleSheet(feild_style)
-        cleanning_status_room.setText(str(room[3]))
-        cleanning_status_room.setObjectName("room_cleanning_status")
-        cleanning_status_room.setAlignment(Qt.AlignCenter)
-
-        faults_room = QPushButton(room_frame)
-        faults_room.setGeometry(840, 0, 130, 50)
-        faults_room.setStyleSheet(feild_style)
-        faults_room.setIcon(QIcon(QPixmap('UI/ICONS/alert.png')))
-        faults_room.setIconSize(QSize(30, 30))
+        faults_room = QPushButton(" Faults", room_frame)
+        faults_room.setProperty("variant", "link")
+        faults_room.setCursor(Qt.PointingHandCursor)
+        faults_room.setIcon(theme.icon("wrench", theme.COLORS["accent"], 16))
+        faults_room.setIconSize(QSize(16, 16))
         faults_room.setObjectName("room_faults")
         faults_room.clicked.connect(lambda: self.show_faults(room[0]))
+        layout.addWidget(self.fixed_cell(faults_room, COLUMNS_WIDTH[4]))
 
-        dates_catch_room = QPushButton(room_frame)
-        dates_catch_room.setGeometry(1000, 0, 240, 50)
-        dates_catch_room.setStyleSheet(feild_style)
-        dates_catch_room.setIcon(QIcon(QPixmap('UI/ICONS/calendar.png')))
-        dates_catch_room.setIconSize(QSize(30, 30))
+        dates_catch_room = QPushButton(" Bookings", room_frame)
+        dates_catch_room.setProperty("variant", "link")
+        dates_catch_room.setCursor(Qt.PointingHandCursor)
+        dates_catch_room.setIcon(theme.icon("calendar", theme.COLORS["accent"], 16))
+        dates_catch_room.setIconSize(QSize(16, 16))
         dates_catch_room.setObjectName("room_dates_catch")
         dates_catch_room.clicked.connect(lambda: self.show_dates_catch(room[0]))
+        layout.addWidget(self.fixed_cell(dates_catch_room, COLUMNS_WIDTH[5]))
 
-        btn_style = """
-		QPushButton:hover {
-			background:   rgb(48, 120, 200);
-		}
-		QPushButton{
-			border-radius:15px;
-			background: rgba(35, 130, 220,0.4);
-		}
-		"""
+        layout.addStretch()
         delete_room_btn = QtWidgets.QPushButton(room_frame)
-        delete_room_btn.setGeometry(1250, 10, 30, 30)
-        delete_room_btn.setStyleSheet(btn_style)
-        delete_room_btn.setIcon(QIcon(QPixmap('UI/ICONS/close.png')))
-        delete_room_btn.setIconSize(QSize(20, 20))
+        delete_room_btn.setProperty("variant", "icon")
+        delete_room_btn.setCursor(Qt.PointingHandCursor)
+        delete_room_btn.setToolTip(f"Delete room {room[0]}")
+        delete_room_btn.setIcon(theme.icon("trash", theme.COLORS["danger"], 18))
+        delete_room_btn.setIconSize(QSize(18, 18))
         delete_room_btn.setObjectName("delete_room_btn")
         delete_room_btn.clicked.connect(lambda: self.delete_room(room[0]))
+        layout.addWidget(delete_room_btn)
 
         return room_frame
+
+    def fixed_cell(self, widget, width):
+        holder = QFrame()
+        holder.setFixedWidth(width)
+        holder_layout = QHBoxLayout(holder)
+        holder_layout.setContentsMargins(0, 0, 0, 0)
+        holder_layout.addWidget(widget, 0, Qt.AlignLeft | Qt.AlignVCenter)
+        return holder
 
     # -------------------------clicked event functions-------------------------
 

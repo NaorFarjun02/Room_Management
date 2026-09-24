@@ -1,11 +1,12 @@
 import datetime
 import time
 
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMainWindow, QSizeGrip
 from PyQt5.uic import loadUi
-from PyQt5.QtCore import QDateTime,QThread,pyqtSignal
+from PyQt5.QtCore import Qt, QDateTime, QThread, pyqtSignal, QSize
 
 from models import *
+from UI import theme
 from .title_bar import Title_Bar
 from .home_menu_widget import Home_Menu_Widget
 from .new_order_widget import New_Order_Widget
@@ -19,10 +20,19 @@ class Thread_for_time_and_date(QThread):
 	def run(self):
 		while True:
 			current_time=QDateTime.currentDateTime()
-			current_time=current_time.toString('dd/MM/yyyy\nhh:mm:ss')
+			current_time=current_time.toString('hh:mm:ss\nddd, dd MMM yyyy')
 			self.update_progress.emit(current_time)
 			time.sleep(1)
 
+
+# title + subtitle that the header shows for every page in the stack
+PAGES_HEADERS = {
+	windows_indexes["home-menu"]: ("Dashboard", "Search orders and jump to the daily work"),
+	windows_indexes["new-order"]: ("New order", "Book a room for a guest"),
+	windows_indexes["rooms-view"]: ("Rooms", "Live status of every room in the hotel"),
+	windows_indexes["view-order"]: ("Order details", "Check guests in and out, update or delete the order"),
+	windows_indexes["update-order"]: ("Update order", "Change the details of an existing order"),
+}
 
 
 class Main_Page(QMainWindow):
@@ -30,16 +40,25 @@ class Main_Page(QMainWindow):
 		"""init function that set al the main stuff of th page like UI and clicked event"""
 		super(Main_Page, self).__init__()
 		loadUi("UI/UI_Files/main_page.ui", self)  # load the UI of the page
-		# self.setWindowFlag(Qt.FramelessWindowHint)# this will hide the title bar
-		self.setWindowTitle("Hotel Manegmant")
+		self.setWindowFlag(Qt.FramelessWindowHint)# this will hide the title bar (the app has its own header)
+		self.setWindowTitle("Room Manager")
 		######################## add title widget ########################
-		title_Bar=Title_Bar(self)
-		self.top_widget.addWidget(title_Bar)
+		self.title_bar=Title_Bar(self)
+		self.top_widget.addWidget(self.title_bar)
 		##################################################################
 
 
 		######################## buttons section #########################
 		self.setting_button.clicked.connect(self.settings_function)  # click event to the settings button
+		self.nav_home_btn.clicked.connect(lambda: self.go_to_page(windows_indexes["home-menu"]))
+		self.nav_new_order_btn.clicked.connect(lambda: self.go_to_page(windows_indexes["new-order"]))
+		self.nav_rooms_btn.clicked.connect(lambda: self.go_to_page(windows_indexes["rooms-view"]))
+		self.nav_buttons = {
+			windows_indexes["home-menu"]: self.nav_home_btn,
+			windows_indexes["new-order"]: self.nav_new_order_btn,
+			windows_indexes["rooms-view"]: self.nav_rooms_btn,
+		}
+		self.setup_sidebar_icons()
 		##################################################################
 
 
@@ -61,9 +80,12 @@ class Main_Page(QMainWindow):
 		# -------------------------------------------------------------------------------------------------------------#
 
 		##################################################################
+		self.widget_section.currentChanged.connect(self.page_changed)  # keep the header + sidebar in sync with the page
 		self.widget_section.setCurrentIndex(windows_indexes["home-menu"])##start the program with the home menu widget##
-		self.widget_section.setFixedWidth(1300)# set width
-		self.widget_section.setFixedHeight(780)#set height
+		self.page_changed(windows_indexes["home-menu"])
+
+		self.size_grip = QSizeGrip(self)  # the window has no system frame, so give it a resize handle
+		self.content_layout.addWidget(self.size_grip, 0, Qt.AlignBottom | Qt.AlignRight)
 
 		self.time_date_thread= Thread_for_time_and_date()
 		self.time_date_thread.start()
@@ -72,7 +94,27 @@ class Main_Page(QMainWindow):
 		# self.time_date_thread=QThread(self,target=self.set_time_for_display)#create thread for time
 		# self.time_date_thread.start()#strat the thread time
 
-		
+
+	def setup_sidebar_icons(self):
+		sidebar_icons = [(self.nav_home_btn, "home"), (self.nav_new_order_btn, "plus"), (self.nav_rooms_btn, "bed"),
+						 (self.setting_button, "settings")]
+		for btn, icon_name in sidebar_icons:
+			btn.setIcon(theme.icon(icon_name, theme.COLORS["sidebar_text"], 20))
+			btn.setIconSize(QSize(20, 20))
+
+
+	def go_to_page(self, index):
+		# start when click on one of the sidebar buttons
+		if index == windows_indexes["rooms-view"]:
+			self.widget_section.widget(index).refresh_rooms_status()
+		self.widget_section.setCurrentIndex(index)
+
+
+	def page_changed(self, index):
+		title, subtitle = PAGES_HEADERS.get(index, ("", ""))
+		self.title_bar.set_page_title(title, subtitle)
+		for page_index, btn in self.nav_buttons.items():
+			theme.set_selected(btn, page_index == index)
 
 
 	def settings_function(self):
@@ -81,7 +123,6 @@ class Main_Page(QMainWindow):
 
 
 	def set_time_and_date_for_display(self,time_date):
-		self.time_and_date_label.setText(time_date)
-
-
-
+		time_text, date_text = time_date.split("\n")
+		self.time_and_date_label.setText(time_text)
+		self.date_label.setText(date_text)

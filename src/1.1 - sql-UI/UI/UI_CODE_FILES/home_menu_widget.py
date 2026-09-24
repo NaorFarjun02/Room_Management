@@ -1,9 +1,12 @@
+from PyQt5.QtCore import QSize
 from PyQt5.QtWidgets import QWidget
 from PyQt5.uic import loadUi
 
 from .list_dialog import List_Dialog
 from models import *
 from models.dialogs.popup_msg import MSG_Popup
+from UI import theme
+from .components import Stat_Tile
 
 
 class Home_Menu_Widget(QWidget):
@@ -18,6 +21,43 @@ class Home_Menu_Widget(QWidget):
         self.rooms_button.clicked.connect(self.rooms_function)  # click event to the rooms button
 
         self.search_order_button.clicked.connect(self.search_order_function)  # click event to the search order button
+        self.search_order_line_edit.returnPressed.connect(self.search_order_function)  # Enter in the search line = search
+
+        ############### icons section ###############
+        self.search_order_line_edit.addAction(theme.icon("search", theme.COLORS["text_faint"], 18),
+                                              self.search_order_line_edit.LeadingPosition)
+        self.rooms_card_icon.setPixmap(theme.pixmap("bed", theme.COLORS["accent"], 26))
+        self.new_order_card_icon.setPixmap(theme.pixmap("calendar", theme.COLORS["accent"], 26))
+        self.rooms_button.setIcon(theme.icon("arrow_right", theme.COLORS["text"], 16))
+        self.new_order_button.setIcon(theme.icon("plus", "#FFFFFF", 16))
+        for btn in (self.rooms_button, self.new_order_button):
+            btn.setIconSize(QSize(16, 16))
+
+        ############### rooms at a glance ###############
+        self.stat_tiles = {
+            "total": Stat_Tile("Rooms in the hotel", "bed", theme.COLORS["accent"]),
+            "free": Stat_Tile("Available now", "check", theme.COLORS["success"]),
+            "catch": Stat_Tile("Occupied now", "users", theme.COLORS["accent"]),
+            "dirty": Stat_Tile("Need cleaning", "alert", theme.COLORS["warning"]),
+        }
+        for tile in self.stat_tiles.values():
+            self.stats_layout.addWidget(tile)
+
+    def showEvent(self, event):
+        # every time the dashboard is shown, refresh the rooms numbers
+        super(Home_Menu_Widget, self).showEvent(event)
+        self.refresh_stats()
+
+    def refresh_stats(self):
+        try:
+            rooms = get_rooms_from_db()  # (room_number, capacity, is_catch, is_clean)
+        except Exception as e:
+            print(e)
+            return
+        self.stat_tiles["total"].set_value(len(rooms))
+        self.stat_tiles["catch"].set_value(sum(1 for r in rooms if r[2]))
+        self.stat_tiles["free"].set_value(sum(1 for r in rooms if not r[2]))
+        self.stat_tiles["dirty"].set_value(sum(1 for r in rooms if not r[3]))
 
     #############################################
 

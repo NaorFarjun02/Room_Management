@@ -1,8 +1,10 @@
 
-from PyQt5.QtWidgets import QWidget, QFrame, QLabel,QDialog
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QWidget, QFrame, QLabel,QDialog, QHBoxLayout
 from PyQt5.uic import loadUi
 
 from models import *
+from UI import theme
 
 
 class Faults_Dialog(QDialog):
@@ -24,17 +26,19 @@ class Faults_Dialog(QDialog):
 	def create_fault_frame(self,fault):
 		faults_frame = QFrame(self)
 		faults_frame.setObjectName(u"faults_frame")
-		faults_frame.setFixedHeight(40)
-		faults_frame.setFixedWidth(350)
-		faults_frame.setGeometry(10, 10, 350, 40)
-		faults_frame.setStyleSheet(u"background-color: rgb(141, 193, 231)")
+		faults_frame.setProperty("listitem", "true")
+		layout = QHBoxLayout(faults_frame)
+		layout.setContentsMargins(16, 12, 16, 12)
+		layout.setSpacing(12)
+
+		fault_icon = QLabel(faults_frame)
+		fault_icon.setPixmap(theme.pixmap("alert", theme.COLORS["warning"], 20))
+		layout.addWidget(fault_icon, 0, Qt.AlignTop)
 
 		start_date_label = QLabel(faults_frame)
 		start_date_label.setObjectName(u"fault_label")
-		start_date_label.setGeometry(10, 10, 130, 20)
 		start_date_label.setText(fault)
-		start_date_label.setStyleSheet(u"font: 19pt \"Calibri\";")
-
-
+		start_date_label.setWordWrap(True)
+		layout.addWidget(start_date_label, 1)
 
 		return faults_frame

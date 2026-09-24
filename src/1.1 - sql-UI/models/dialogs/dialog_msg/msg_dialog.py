@@ -1,6 +1,8 @@
 from PyQt5.QtWidgets import QDialog
 from PyQt5.uic import loadUi
 
+from UI import theme
+
 
 
 class MSG_Dialog(QDialog):
@@ -13,6 +15,7 @@ class MSG_Dialog(QDialog):
 		self.msg_btn_1.setText(btn1_text)
 		self.msg_btn_2.setText(btn2_text)
 		self.setWindowTitle(label_text)
+		self.msg_icon.setPixmap(theme.pixmap("help", theme.COLORS["accent"], 24))
 		
 		self.msg_btn_1.clicked.connect(self.btn1_click)
 		self.msg_btn_2.clicked.connect(self.btn2_click)
