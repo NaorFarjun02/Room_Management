@@ -1,5 +1,5 @@
 import random, sys
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, sip
 from PyQt5.QtWidgets import QApplication, QDialog
 
 from models import *
@@ -27,9 +27,10 @@ def main():
 		main_page = Main_Page()  # create main page
 		main_page.show()
 		app.exec_()
-		if not main_page.want_relogin:
-			break  # the window was closed (not "Log out" / auto-lock) -> quit the app
 		relogin_reason = main_page.want_relogin  # "logout" or "auto_lock" -> logged by the logout() call above, next loop
+		sip.delete(main_page)  # free the closed window now - the next login builds a new one
+		if not relogin_reason:
+			break  # the window was closed (not "Log out" / auto-lock) -> quit the app
 
 if __name__ == '__main__':
 	main()

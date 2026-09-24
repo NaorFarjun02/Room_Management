@@ -1,4 +1,7 @@
+import functools
 import sqlite3
+import sys
+
 import psycopg2
 
 from . import db_config
@@ -20,12 +23,28 @@ VERABLE_ERROR_CODE = 502
 ERROR_CODE = 500
 
 _db_settings = db_config.get()
-DB_CON = psycopg2.connect(host=_db_settings["host"], dbname=_db_settings["dbname"], user=_db_settings["user"],
-                          password=_db_settings["password"], port=_db_settings["port"])
+try:
+    DB_CON = psycopg2.connect(host=_db_settings["host"], dbname=_db_settings["dbname"], user=_db_settings["user"],
+                              password=_db_settings["password"], port=_db_settings["port"])
+except psycopg2.OperationalError as e:
+    sys.exit(f"Can't connect to the database: {e}\n"
+             f"Copy db_config.example.json to db_config.json (next to main.py) and set your database settings there, "
+             f"or set the ROOM_MANAGER_DB_* environment variables.")
 DB_CURSER = DB_CON.cursor()
 
 
-stop_time_thread = False
+def rollback_on_error(func):
+    """Decorator for a database function: if it raises, roll back the open transaction before re-raising.
+    Without this, one failed query leaves the connection in an aborted state and every query after it fails."""
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception:
+            DB_CON.rollback()
+            raise
+    return wrapper
+
 
 windows_indexes = {
 

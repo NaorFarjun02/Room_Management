@@ -47,7 +47,7 @@ class View_Order_Widget(QWidget):
         msg_label = "Check-in customer??" if not self.check_in_status else "Cancel check-in customer??"
         q = MSG_Dialog(msg_label, "Yes", "No")  # ask the user he want to check-in/undo the check-in for this order
         q.exec_()
-        if q.status == "No":
+        if q.status != "Yes":  # "No", or the dialog was closed without an answer
             return
         self.check_in_status = not self.check_in_status  # change the status of check-in in the UI variable
         try:
@@ -91,7 +91,7 @@ class View_Order_Widget(QWidget):
             msg_label = f"The leaving date {self.leaving_date} has passed. Check-out the customer and close the order?"
         q = MSG_Dialog(msg_label, "Yes", "No")  # ask the user if he want to check-out/undo check-out for this order
         q.exec_()
-        if q.status == "No":
+        if q.status != "Yes":  # "No", or the dialog was closed without an answer
             return
         self.check_out_status = not self.check_out_status  # change the status of check-out in the UI variable
         try:
@@ -109,8 +109,12 @@ class View_Order_Widget(QWidget):
             # print(error[1])
             else:
                 # if the check-out status is False that mean the user is click to cencel check-out the order
-                cancel_check_out_db(order_id=self.order_id)
-                self.change_btn_color(self.check_out_btn, self.check_out_status)  # cencel the color of the button
+                code, msg = cancel_check_out_db(order_id=self.order_id)
+                if code == OK_CODE:
+                    self.change_btn_color(self.check_out_btn, self.check_out_status)  # cencel the color of the button
+                else:
+                    self.check_out_status = not self.check_out_status  # return the value to what was before the function
+                    MSG_Popup(msg).exec_()
 
         except Exception as e:
             print("check-out in widget", e)
@@ -127,7 +131,7 @@ class View_Order_Widget(QWidget):
         """
         delete_status = MSG_Dialog("Delete the order", "Yes", "No")
         delete_status.exec_()
-        if delete_status.status == "No":
+        if delete_status.status != "Yes":  # "No", or the dialog was closed without an answer
             return
         delete_status = delete_order_from_db_by_id(delete_code=DELETE_CODE, order_id=self.order_id)
         if delete_status[0] == ERROR_CODE:

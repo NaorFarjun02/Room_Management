@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 from .global_ver import *
 def create_range(start, end, order_id=0):
 	# print(start, end, order_id)
@@ -27,6 +28,10 @@ class Dates_Range():
 			if (check_date_numbers[0] > 31 or check_date_numbers[0] < 1) or (
 					check_date_numbers[1] > 12 or check_date_numbers[1] < 1):
 				# check the day number is between 1 and 31 and the month number is between 1 and 12
+				return ""
+			try:
+				datetime.strptime(date, "%d/%m/%Y")  # a real calendar date (no 31/02)
+			except ValueError:
 				return ""
 			return date
 		return ""

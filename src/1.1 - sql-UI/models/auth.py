@@ -9,10 +9,11 @@ buttons the current user can't use, and every sensitive database function is wra
 import functools
 import hashlib
 import hmac
+import math
 import os
 import time
 
-from .global_ver import DB_CON, DB_CURSER, OK_CODE, ERROR_CODE
+from .global_ver import DB_CON, DB_CURSER, OK_CODE, ERROR_CODE, rollback_on_error
 from . import session
 from . import activity_log
 
@@ -25,6 +26,7 @@ MANAGER_ONLY_ACTIONS = {
     "rename_room",
     "delete_order",
     "manage_users",
+    "view_activity_log",
 }
 
 MIN_PASSWORD_LENGTH = 8
@@ -99,7 +101,9 @@ def get_user_by_username(username):
 
 
 def list_users():
-    """Every user, without their password hash, ordered by full name"""
+    """Every user, without their password hash, ordered by full name (empty for a non-manager)"""
+    if not can("manage_users"):
+        return []
     DB_CURSER.execute("""SELECT id, username, full_name, role, is_active, created_at, last_login
         FROM users ORDER BY full_name""")
     keys = ["id", "username", "full_name", "role", "is_active", "created_at", "last_login"]
@@ -119,11 +123,16 @@ def active_manager_count(exclude_id=None):
 
 ########################################## login ##########################################
 def _is_locked_out(username):
-    entry = _failed_attempts.get(username.lower())
+    """Seconds left on the lockout, 0 if not locked. An expired lockout starts the count again from zero."""
+    key = username.lower()
+    entry = _failed_attempts.get(key)
     if not entry:
         return 0
-    remaining = entry[1] - time.time()
-    return max(0, int(remaining))
+    locked_until = entry[1]
+    if locked_until and locked_until <= time.time():
+        _failed_attempts.pop(key, None)  # the lockout is over -> the user gets a fresh set of attempts
+        return 0
+    return max(0, math.ceil(locked_until - time.time()))
 
 
 def _record_failed_attempt(username):
@@ -138,6 +147,7 @@ def _clear_failed_attempts(username):
     _failed_attempts.pop(username.lower(), None)
 
 
+@rollback_on_error
 def authenticate(username, password):
     """(OK_CODE, user dict) on success, (ERROR_CODE, message) otherwise. Does not touch the session -
     the caller logs the session in with session.current.login(user) after a successful call."""
@@ -164,6 +174,7 @@ def authenticate(username, password):
     return OK_CODE, user
 
 
+@rollback_on_error
 def change_own_password(current_password, new_password):
     """Any logged-in user may change their own password - unlike update_user, this needs no manage_users
     permission, only the current password."""
@@ -194,6 +205,7 @@ def _validate_user_fields(full_name, username, role, password):
     return None
 
 
+@rollback_on_error
 def create_first_manager(full_name, username, password):
     """Creates the very first user (a manager) and logs them in. Only works while there are no users
     at all, so it can't be used to slip in a new manager once the app has real accounts."""
@@ -214,6 +226,7 @@ def create_first_manager(full_name, username, password):
 
 
 @require_permission("manage_users")
+@rollback_on_error
 def create_user(full_name, username, role, password):
     error = _validate_user_fields(full_name, username, role, password)
     if error:
@@ -230,6 +243,7 @@ def create_user(full_name, username, role, password):
 
 
 @require_permission("manage_users")
+@rollback_on_error
 def update_user(user_id, full_name=None, username=None, role=None, password=None):
     """Fields left as None keep their current value. Password is only changed when given."""
     user = get_user(user_id)
@@ -263,6 +277,7 @@ def update_user(user_id, full_name=None, username=None, role=None, password=None
 
 
 @require_permission("manage_users")
+@rollback_on_error
 def set_user_active(user_id, is_active):
     """Disable (is_active=False) or re-enable a user. A disabled user can't log in, but their name
     stays on their past orders and log entries."""

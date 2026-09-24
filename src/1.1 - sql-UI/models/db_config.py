@@ -4,8 +4,8 @@ Database connection settings.
 Priority: environment variables > db_config.json (in the app folder, next to main.py) > built-in defaults.
 
 db_config.json is NOT committed to git (see .gitignore) - copy db_config.example.json to db_config.json
-next to it and edit it with your own database credentials. Without either, the app falls back to the
-same local defaults it always used, so a fresh checkout still runs against a local dev database.
+next to it and edit it with your own database credentials. There is no default password - set it in
+db_config.json or in the ROOM_MANAGER_DB_PASSWORD environment variable.
 """
 import json
 import os
@@ -18,7 +18,7 @@ _DEFAULTS = {
     "port": 55555,
     "dbname": "hotel_manegmant",
     "user": "postgres",
-    "password": "159633",
+    "password": None,
 }
 
 

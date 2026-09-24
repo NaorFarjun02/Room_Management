@@ -6,6 +6,7 @@ never `from .session import current`, which would copy the reference at import t
 moment someone logs in or out (the same trap the old CURRENT_USER constant had).
 """
 from . import activity_log
+from .global_ver import DB_CON
 
 
 class Session:
@@ -29,6 +30,7 @@ class Session:
                       else f"{self.display_name()} was auto-locked out after being idle")
             activity_log.log_activity(reason if reason in ("logout", "auto_lock") else "logout", summary,
                                       actor=self.username)
+            DB_CON.commit()
         self.__init__()
 
     def is_logged_in(self):

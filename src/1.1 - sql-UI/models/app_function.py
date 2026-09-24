@@ -4,7 +4,7 @@ from datetime import datetime, date, timedelta
 
 from .Logs import *
 from .global_ver import *
-from .range_of_dates import Dates_Range, create_range
+from .range_of_dates import Dates_Range
 from . import auth
 from . import session
 from . import activity_log
@@ -154,7 +154,6 @@ def create_date_range_in_db(order_id, room_number, date_range):
         date_range.get_leaving_date(),
     ]
     DB_CURSER.execute("INSERT INTO dates_range VALUES(%s,%s,%s,%s)", date_range_to_db)
-    DB_CON.commit()
     return OK_CODE, f"Date range for order {order_id} created: {date_range.get_arrival_date()} - {date_range.get_leaving_date()}"
 
 def create_order_in_db(order_info):
@@ -164,8 +163,6 @@ def create_order_in_db(order_info):
         RETURNING id""",
         order_info,
     )
-    DB_CON.commit()
-
     return DB_CURSER.fetchone()[0]
 
 #################################### Side functions ####################################
@@ -181,11 +178,13 @@ def get_multi_data_from_db(sql="", params=[]):
 #################################### Menu options ####################################
 
 # ====================================================section 11 - add new room fault====================================================
+@rollback_on_error
 def add_new_room_fault(room_number, fault):
     DB_CURSER.execute("INSERT INTO rooms_faults VALUES(%s,%s)", [room_number, fault])
     activity_log.log_activity("fault_added", f"Room {room_number}: {fault}", actor=session.current.username)
     DB_CON.commit()
 
+@rollback_on_error
 def delete_room_fault_db(room_number, fault):
     """Remove one fault from the room (the fault was fixed)"""
     DB_CURSER.execute("""
@@ -202,9 +201,9 @@ def delete_date_range_from_db_by_order(order_id: int = -1):
     if order_id == -1:
         return ERROR_CODE, "ORDER_ID can't be -1"
     DB_CURSER.execute("DELETE FROM dates_range WHERE order_id = %s", (order_id,))
-    DB_CON.commit()
 
 @auth.require_permission("delete_order")
+@rollback_on_error
 def delete_order_from_db_by_id(delete_code: int = 0, order_id: int = -1):
     # try:
     if delete_code != DELETE_CODE:  # Must have a delete code to confirm the delete
@@ -238,7 +237,6 @@ def check_out_db(order_id=-1):
             today = date.today()
             start_date, end_date = get_start_and_end_dates(order_id)
             arrival = datetime.strptime(start_date, "%d/%m/%Y").date()
-            leaving = datetime.strptime(end_date, "%d/%m/%Y").date()
             if today < arrival:
                 # check-out is possible from the arrival day (leaving early / late is ok)
                 return False, (f"Check-out is only possible from the arrival day ({start_date}). "
@@ -256,9 +254,11 @@ def check_out_db(order_id=-1):
         elif not in_status:
             return False, "The customer not check-in yet!!"
     except Exception as e:
+        DB_CON.rollback()
         print("check-out in db: ", e)
         return False, f"Can't check-out: {e}"
 
+@rollback_on_error
 def cancel_check_out_db(order_id=-1):
     in_status, out_status = get_check_in_and_out_status(order_id)
     if in_status and out_status:
@@ -306,9 +306,11 @@ def check_in_db(order_id=-1):
         elif out_status:
             return False, "The customer is already check out!!"
     except Exception as e:
+        DB_CON.rollback()
         print("check-in in db: ", e)
         return False, f"Can't check-in: {e}"
 
+@rollback_on_error
 def cancel_check_in_db(order_id=-1):
     in_status, out_status = get_check_in_and_out_status(order_id)
     if in_status and not out_status:
@@ -333,6 +335,7 @@ def get_rooms_from_db():
     rooms_list = DB_CURSER.fetchall()
     return rooms_list
 
+@rollback_on_error
 def get_rooms_status_from_db():
     """
     All the rooms with their live status:
@@ -355,6 +358,7 @@ def get_rooms_status_from_db():
         ORDER BY r.room_number""")
     return DB_CURSER.fetchall()
 
+@rollback_on_error
 def get_all_orders_from_db(include_closed=False):
     """
     All the orders with their dates, open orders only by default (closed = the customer checked-out)
@@ -387,12 +391,14 @@ def delete_room_db(room_number=-1):
         return OK_CODE, f"Room {room_number} deleted"
 
     except Exception as e:
+        DB_CON.rollback()
         return ERROR_CODE, f"Can't delete room: {e}"
 
 # ==============================================================================================================================
 # --------------------------------------------------------------------------------------------------------------------------------------------
 # ====================================================section 3 - add new room====================================================
 @auth.require_permission("add_room")
+@rollback_on_error
 def create_room_in_db(room_capacity: int):
     DB_CURSER.execute("INSERT INTO rooms (room_capacity) VALUES(%s) RETURNING room_number", (room_capacity,))
     room_number = DB_CURSER.fetchone()[0]
@@ -401,6 +407,7 @@ def create_room_in_db(room_capacity: int):
     DB_CON.commit()
     return OK_CODE, "Room created"
 
+@rollback_on_error
 def set_room_clean_db(room_number, clean=True):
     """Mark the room as clean (or as needs cleaning when clean=False)"""
     DB_CURSER.execute("UPDATE rooms SET room_is_clean = %s WHERE room_number = %s", (clean, room_number))
@@ -410,6 +417,7 @@ def set_room_clean_db(room_number, clean=True):
     return OK_CODE, f"Room {room_number} is {'clean' if clean else 'needs cleaning'}"
 
 @auth.require_permission("rename_room")
+@rollback_on_error
 def set_room_name_db(room_number, name):
     """Set (or, with an empty name, clear) the room's display name. Names must be unique."""
     name = (name or "").strip() or None
@@ -430,25 +438,39 @@ def set_room_name_db(room_number, name):
 # --------------------------------------------------------------------------------------------------------------------------------------------
 # ====================================================section 2 - update order====================================================
 
+@rollback_on_error
 def update_order_db(order_id: int = -1, customer_name: str = "", number_of_guests: int = 0,
                     breakfast: bool = False, lunch: bool = False, dinner: bool = False,
                     electric_car: bool = False, pet: bool = False, arrival_date: str = "", leaving_date: str = ""):
-    order = get_order_from_db_by_id(order_id)[1]  # [1]: unwrap the (OK_CODE, order) pair to get the order itself
-    exist_order = [order[i] for i in [0, 1, 2, 3, 4, 5, 6, 7, 8]]
+    order_status = get_order_from_db_by_id(order_id)
+    if order_status[0] != OK_CODE:
+        return ERROR_CODE, order_status[1]
+    order = order_status[1]  # id, customer_name, number_of_guests, room_number, ..., pet, check_in, check_out, ...
+    exist_guests, room_number, checked_in, checked_out = order[2], order[3], order[9], order[10]
     exist_arrival_date, exist_leaving_date = get_start_and_end_dates(order_id)
-    exist_order.append(exist_arrival_date)
-    exist_order.append(exist_leaving_date)
     if customer_name == "":
-        customer_name = exist_order[1]
+        customer_name = order[1]
     if number_of_guests == 0:
-        number_of_guests = exist_order[2]
+        number_of_guests = exist_guests
+    if number_of_guests < 1:
+        return VERABLE_ERROR_CODE, "The order must have at least 1 guest"
     if arrival_date == "" or leaving_date == "":
         arrival_date, leaving_date = exist_arrival_date, exist_leaving_date
-    room_number = exist_order[3]
-    if exist_order[2] != number_of_guests or exist_order[8] != arrival_date or exist_order[9] != leaving_date:
-        delete_date_range_from_db_by_order(order_id)  # Delete old date_range
+    if exist_guests != number_of_guests or exist_arrival_date != arrival_date or exist_leaving_date != leaving_date:
         new_date_range = Dates_Range(arrival_date, leaving_date)
-        room_number = search_available_room(number_of_guests, new_date_range)
+        if not new_date_range.range_ok:
+            return VERABLE_ERROR_CODE, new_date_range.error_text
+        delete_date_range_from_db_by_order(order_id)  # free the old dates, so they don't block the search below
+        if not is_room_available(room_number, number_of_guests, new_date_range):  # keep the same room when it's free
+            if checked_in and not checked_out:
+                # the guest is already in the room -> don't move them to another room behind their back
+                DB_CON.rollback()
+                return ROOM_ERROR_CODE, (f"The guest is checked-in to room {room_number}, and that room is not free "
+                                         f"for {number_of_guests} guests from {arrival_date} to {leaving_date}")
+            room_number = search_available_room(number_of_guests, new_date_range)
+            if room_number == 0:
+                DB_CON.rollback()  # put the old dates back
+                return ROOM_ERROR_CODE, f"No room available for {number_of_guests} guests from {arrival_date} to {leaving_date}"
         create_date_range_in_db(order_id, room_number, new_date_range)  # Create new date_range
     update_q = "UPDATE orders SET customer_name=%s, number_of_guests =%s, room_number=%s, breakfast =%s, lunch =%s, dinner =%s, electric_car =%s, pet =%s where id=%s "
     params = (customer_name, number_of_guests, room_number, breakfast, lunch, dinner, electric_car, pet, order_id)
@@ -462,22 +484,33 @@ def update_order_db(order_id: int = -1, customer_name: str = "", number_of_guest
 # =================================================================================================================================
 # --------------------------------------------------------------------------------------------------------------------------------------------
 # ====================================================section 1 - add new order====================================================
-def search_available_room(guests_num, date_range):
-    DB_CURSER.execute("""SELECT r.room_number,r.room_capacity
-        FROM rooms r
-        LEFT JOIN rooms_faults rf ON r.room_number = rf.room_number
-        LEFT JOIN dates_range dr ON r.room_number = dr.room_number
-        WHERE r.room_capacity >= %s
-        AND (dr.start_date IS NULL OR dr.end_date IS NULL
-            OR (dr.start_date > %s OR dr.end_date < %s))
-        AND rf.room_number IS NULL;
-    """, (guests_num, date_range.get_arrival_date(), date_range.get_leaving_date()))
-    rooms_available = DB_CURSER.fetchall()
-    if len(rooms_available) > 0:
-        smallest_room = min(rooms_available, key=lambda x: x[0])
-        return smallest_room[0]
-    return 0
+# A room is free for a stay when it has no faults and none of its bookings overlap the stay. The leaving day is the
+# check-out day, so a new guest can arrive on the day another one leaves. Dates are stored as dd/mm/yyyy text, so
+# they are compared with to_date() - comparing the text itself puts "02/01/2027" before "15/12/2026".
+_FREE_ROOMS_SQL = """
+    SELECT r.room_number FROM rooms r
+    WHERE r.room_capacity >= %(guests)s
+        AND NOT EXISTS (SELECT 1 FROM rooms_faults rf WHERE rf.room_number = r.room_number)
+        AND NOT EXISTS (SELECT 1 FROM dates_range dr WHERE dr.room_number = r.room_number
+            AND to_date(dr.start_date, 'DD/MM/YYYY') < to_date(%(leaving)s, 'DD/MM/YYYY')
+            AND to_date(dr.end_date, 'DD/MM/YYYY') > to_date(%(arrival)s, 'DD/MM/YYYY'))"""
 
+def _free_rooms_params(guests_num, date_range):
+    return {"guests": guests_num, "arrival": date_range.get_arrival_date(), "leaving": date_range.get_leaving_date()}
+
+def search_available_room(guests_num, date_range):
+    """The lowest-numbered free room for the stay, or 0 if there is none"""
+    DB_CURSER.execute(_FREE_ROOMS_SQL + " ORDER BY r.room_number LIMIT 1", _free_rooms_params(guests_num, date_range))
+    room = DB_CURSER.fetchone()
+    return room[0] if room else 0
+
+def is_room_available(room_number, guests_num, date_range):
+    """Is this specific room free for the stay?"""
+    DB_CURSER.execute(_FREE_ROOMS_SQL + " AND r.room_number = %(room)s",
+                      dict(_free_rooms_params(guests_num, date_range), room=room_number))
+    return DB_CURSER.fetchone() is not None
+
+@rollback_on_error
 def create_new_order_in_db(customer_name: str = None, guests: int = None, breakfast: bool = False, lunch: bool = False,
                            dinner: bool = False, electric_car: bool = False,
                            pet: bool = False, arrival_date: str = None, leaving_date: str = None):
@@ -493,15 +526,9 @@ def create_new_order_in_db(customer_name: str = None, guests: int = None, breakf
         # print("------------------Start create order------------------")
         if guests < 1:  # check if the guests number is ok
             return VERABLE_ERROR_CODE, "Can be 0 guests"
-        order_dates_range = create_range(
-            arrival_date, leaving_date
-        )  # create date range for the order
-        if order_dates_range is None:  # check the dates range was created
-            return VERABLE_ERROR_CODE, "Cannot create a date range"
-        if (
-                not order_dates_range.range_ok
-        ):  # check if there is a error in the date range
-            return order_dates_range.error_text
+        order_dates_range = Dates_Range(arrival_date, leaving_date)  # create date range for the order
+        if not order_dates_range.range_ok:  # check if there is a error in the date range
+            return VERABLE_ERROR_CODE, order_dates_range.error_text
         room = search_available_room(
             guests, order_dates_range
         )  # look for available room
@@ -526,6 +553,7 @@ def create_new_order_in_db(customer_name: str = None, guests: int = None, breakf
         activity_log.log_activity("order_created",
                                   f"Order #{str(order_id).zfill(8)} created for {customer_name} ({guests} guests, "
                                   f"room {room}, {arrival_date} → {leaving_date})", actor=session.current.username)
+        DB_CON.commit()  # the order, its dates and the log row are saved together
         return OK_CODE, f"Order created successfully - {order_id}"
     except KeyboardInterrupt:
         exit()

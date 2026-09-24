@@ -1,8 +1,5 @@
-import datetime
-import time
-
-from PyQt5.QtCore import Qt, QDateTime, QThread, pyqtSignal, QSize, QTimer, QEvent
-from PyQt5.QtWidgets import QMainWindow, QSizeGrip, QApplication
+from PyQt5.QtCore import Qt, QDateTime, QSize, QTimer, QEvent
+from PyQt5.QtWidgets import QMainWindow, QSizeGrip, QApplication, QDialog
 from PyQt5.uic import loadUi
 
 from models import *
@@ -16,16 +13,6 @@ from .rooms_view_widget import Room_View_Widget
 from .update_order_widget import Update_Order_Widget
 from .settings_widget import Settings_Widget
 from .orders_list_widget import Orders_List_Widget
-
-
-class Thread_for_time_and_date(QThread):
-	update_progress=pyqtSignal(str)
-	def run(self):
-		while True:
-			current_time=QDateTime.currentDateTime()
-			current_time=current_time.toString('hh:mm:ss\nddd, dd MMM yyyy')
-			self.update_progress.emit(current_time)
-			time.sleep(1)
 
 
 # title + subtitle that the header shows for every page in the stack
@@ -115,12 +102,12 @@ class Main_Page(QMainWindow):
 		self.size_grip = QSizeGrip(self)  # the window has no system frame, so give it a resize handle
 		self.content_layout.addWidget(self.size_grip, 0, Qt.AlignBottom | Qt.AlignRight)
 
-		self.time_date_thread= Thread_for_time_and_date()
-		self.time_date_thread.start()
-		self.time_date_thread.update_progress.connect(self.set_time_and_date_for_display)
-
-		# self.time_date_thread=QThread(self,target=self.set_time_for_display)#create thread for time
-		# self.time_date_thread.start()#strat the thread time
+		# the clock: a timer on the UI thread (a QThread with an endless loop could never be stopped, and every
+		# log out / log in made a new Main_Page with one more of them running)
+		self.clock_timer = QTimer(self)
+		self.clock_timer.timeout.connect(self.set_time_and_date_for_display)
+		self.clock_timer.start(1000)
+		self.set_time_and_date_for_display()
 
 		############### auto-lock: back to the login screen after AUTO_LOCK_MINUTES idle ###############
 		self.idle_timer = QTimer(self)
@@ -164,10 +151,10 @@ class Main_Page(QMainWindow):
 		self.go_to_page(windows_indexes["settings"])
 
 
-	def set_time_and_date_for_display(self,time_date):
-		time_text, date_text = time_date.split("\n")
-		self.time_and_date_label.setText(time_text)
-		self.date_label.setText(date_text)
+	def set_time_and_date_for_display(self):
+		now = QDateTime.currentDateTime()
+		self.time_and_date_label.setText(now.toString("hh:mm:ss"))
+		self.date_label.setText(now.toString("ddd, dd MMM yyyy"))
 
 
 	def apply_role_visibility(self):
@@ -182,7 +169,13 @@ class Main_Page(QMainWindow):
 
 
 	def lock_now(self):
-		# the app was idle for too long -> go back to the login screen
+		# the app was idle for too long -> close any open dialog (as if "No"/"Cancel" was clicked), then go back to
+		# the login screen. Without closing them, a dialog would stay open on top of the login screen.
+		for _ in range(10):  # dialogs can be nested; the limit is only a guard against a dialog that refuses to close
+			dialog = QApplication.activeModalWidget()
+			if dialog is None:
+				break
+			dialog.reject() if isinstance(dialog, QDialog) else dialog.close()
 		self.relogin(reason="auto_lock")
 
 
@@ -194,4 +187,6 @@ class Main_Page(QMainWindow):
 
 	def closeEvent(self, event):
 		QApplication.instance().removeEventFilter(self)  # this Main_Page is about to be destroyed
+		self.idle_timer.stop()
+		self.clock_timer.stop()
 		super(Main_Page, self).closeEvent(event)

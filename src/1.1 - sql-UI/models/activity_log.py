@@ -6,7 +6,7 @@ filtered and searched. Every call site passes its own `actor` (usually session.c
 this module doesn't read the session itself, so it has no dependency on session.py and can be
 imported from anywhere (models/session.py included) without a circular import.
 """
-from .global_ver import DB_CON, DB_CURSER
+from .global_ver import DB_CURSER
 
 # category -> (human label for the pill, filter group)
 CATEGORIES = {
@@ -57,14 +57,21 @@ def category_group(category):
 
 
 def log_activity(category, summary, actor):
-    """Record one row. actor is the username responsible (never read from the session here - pass it in)"""
+    """Record one row. actor is the username responsible (never read from the session here - pass it in).
+    Does not commit: the caller commits once, so the action and its log row are saved (or rolled back) together."""
     DB_CURSER.execute("INSERT INTO activity_log (category, actor, summary) VALUES (%s, %s, %s)",
                       (category, actor or "system", summary))
-    DB_CON.commit()
+
+
+def _can_view_log():
+    from . import auth  # imported here: auth imports this module, so a top-level import would be circular
+    return auth.can("view_activity_log")
 
 
 def get_activity_log(group="all", search="", limit=300):
     """Most recent first, optionally narrowed to one filter group and/or a free-text search"""
+    if not _can_view_log():
+        return []
     sql = "SELECT created_at, category, actor, summary FROM activity_log"
     conditions, params = [], []
     if group != "all":
@@ -85,6 +92,8 @@ def get_activity_log(group="all", search="", limit=300):
 
 def count_by_group():
     """{"all": N, "account": N, "orders": N, "rooms": N, "users": N} for the filter chip counts"""
+    if not _can_view_log():
+        return {group: 0 for group in GROUPS}
     DB_CURSER.execute("SELECT category, COUNT(*) FROM activity_log GROUP BY category")
     per_category = dict(DB_CURSER.fetchall())
     counts = {"all": sum(per_category.values())}
