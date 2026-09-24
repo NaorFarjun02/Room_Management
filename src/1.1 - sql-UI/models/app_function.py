@@ -7,6 +7,7 @@ from .global_ver import *
 from .range_of_dates import Dates_Range, create_range
 from . import auth
 from . import session
+from . import activity_log
 
 #################################### Setup Database ####################################
 def create_DB():
@@ -60,6 +61,14 @@ def create_DB():
         last_login timestamp)"""
     )
     DB_CURSER.execute("""CREATE UNIQUE INDEX IF NOT EXISTS users_username_lower_idx ON users (lower(username))""")
+    DB_CURSER.execute(
+        """CREATE TABLE IF NOT EXISTS activity_log(id SERIAL PRIMARY KEY,
+        created_at timestamp not null default now(),
+        category text not null,
+        actor text,
+        summary text not null)"""
+    )
+    DB_CURSER.execute("""CREATE INDEX IF NOT EXISTS activity_log_created_at_idx ON activity_log (created_at DESC)""")
     DB_CON.commit()
 
 #################################### Get data from DB ####################################
@@ -174,6 +183,7 @@ def get_multi_data_from_db(sql="", params=[]):
 # ====================================================section 11 - add new room fault====================================================
 def add_new_room_fault(room_number, fault):
     DB_CURSER.execute("INSERT INTO rooms_faults VALUES(%s,%s)", [room_number, fault])
+    activity_log.log_activity("fault_added", f"Room {room_number}: {fault}", actor=session.current.username)
     DB_CON.commit()
 
 def delete_room_fault_db(room_number, fault):
@@ -181,6 +191,7 @@ def delete_room_fault_db(room_number, fault):
     DB_CURSER.execute("""
         DELETE FROM rooms_faults WHERE ctid IN (
             SELECT ctid FROM rooms_faults WHERE room_number = %s AND fault = %s LIMIT 1)""", (room_number, fault))
+    activity_log.log_activity("fault_resolved", f"Room {room_number}: {fault}", actor=session.current.username)
     DB_CON.commit()
     return OK_CODE, f"Fault fixed in room {room_number}"
 
@@ -205,9 +216,9 @@ def delete_order_from_db_by_id(delete_code: int = 0, order_id: int = -1):
     DB_CURSER.execute("DELETE FROM orders WHERE id = %s", (order_id,))
 
     # move_order_to_history(order)  # Add the order to history
-    create_log_order_room(ORDERS_LOGGER_LEVELS["order-deleted"]["value"],
-                          ORDERS_LOGGER_LEVELS["order-deleted"]["msg"] % (
-                              order_id, session.current.username))  # log the delete of the order
+    customer_name = order[1][1] if order[0] == OK_CODE else "?"
+    activity_log.log_activity("order_deleted", f"Order #{str(order_id).zfill(8)} ({customer_name}) deleted",
+                              actor=session.current.username)
     DB_CON.commit()
     return OK_CODE, f"Order number {order_id} deleted"
     # except Exception as e:
@@ -236,8 +247,8 @@ def check_out_db(order_id=-1):
             # the guest left -> the room needs cleaning
             DB_CURSER.execute("""UPDATE rooms SET room_is_clean = FALSE
                 WHERE room_number = (SELECT room_number FROM orders WHERE id = %s)""", (order_id,))
-            create_log_order_room(ORDERS_LOGGER_LEVELS["order-check-out"]["value"],
-                                  ORDERS_LOGGER_LEVELS["order-check-out"]["msg"] % order_id)
+            activity_log.log_activity("check_out", f"Order #{str(order_id).zfill(8)} checked out",
+                                      actor=session.current.username)
             DB_CON.commit()
             return True, ""
         elif out_status:
@@ -252,8 +263,8 @@ def cancel_check_out_db(order_id=-1):
     in_status, out_status = get_check_in_and_out_status(order_id)
     if in_status and out_status:
         DB_CURSER.execute("update orders set check_out = FALSE where id = %s", (order_id,))
-        create_log_order_room(ORDERS_LOGGER_LEVELS["order-check-out-cancel"]["value"],
-                              ORDERS_LOGGER_LEVELS["order-check-out-cancel"]["msg"] % order_id)
+        activity_log.log_activity("check_out_cancelled", f"Order #{str(order_id).zfill(8)} check-out cancelled",
+                                  actor=session.current.username)
         DB_CON.commit()
         return OK_CODE, ""
     else:
@@ -286,8 +297,8 @@ def check_in_db(order_id=-1):
                     msg += f" Its leaving date {active_end} has passed and it was not checked-out."
                 return False, msg + " Check-out that order first.", active_id
             DB_CURSER.execute("update orders set check_in = TRUE where id = %s", (order_id,))
-            create_log_order_room(ORDERS_LOGGER_LEVELS["order-check-in"]["value"],
-                                  ORDERS_LOGGER_LEVELS["order-check-in"]["msg"] % order_id)
+            activity_log.log_activity("check_in", f"Order #{str(order_id).zfill(8)} checked in",
+                                      actor=session.current.username)
             DB_CON.commit()
             return True, ""
         elif in_status:
@@ -302,8 +313,8 @@ def cancel_check_in_db(order_id=-1):
     in_status, out_status = get_check_in_and_out_status(order_id)
     if in_status and not out_status:
         DB_CURSER.execute("update orders set check_in = FALSE where id = %s", (order_id,))
-        create_log_order_room(ORDERS_LOGGER_LEVELS["order-check-in-cancel"]["value"],
-                              ORDERS_LOGGER_LEVELS["order-check-in-cancel"]["msg"] % order_id)
+        activity_log.log_activity("check_in_cancelled", f"Order #{str(order_id).zfill(8)} check-in cancelled",
+                                  actor=session.current.username)
         DB_CON.commit()
         return OK_CODE, ""
     else:
@@ -371,10 +382,8 @@ def delete_room_db(room_number=-1):
         return ERROR_CODE, "Room dose not exist"
     try:
         DB_CURSER.execute("DELETE FROM rooms WHERE room_number = %s", (room_number,))
+        activity_log.log_activity("room_deleted", f"Room {room_number} deleted", actor=session.current.username)
         DB_CON.commit()
-        create_log_order_room(ROOMS_LOGGER_LEVELS["room-deleted"]["value"],
-                              ROOMS_LOGGER_LEVELS["room-deleted"]["msg"] % (
-                                  room_number, session.current.username))
         return OK_CODE, f"Room {room_number} deleted"
 
     except Exception as e:
@@ -385,13 +394,18 @@ def delete_room_db(room_number=-1):
 # ====================================================section 3 - add new room====================================================
 @auth.require_permission("add_room")
 def create_room_in_db(room_capacity: int):
-    DB_CURSER.execute("INSERT INTO rooms (room_capacity) VALUES(%s)", (room_capacity,))
+    DB_CURSER.execute("INSERT INTO rooms (room_capacity) VALUES(%s) RETURNING room_number", (room_capacity,))
+    room_number = DB_CURSER.fetchone()[0]
+    activity_log.log_activity("room_created", f"Room {room_number} created (capacity {room_capacity})",
+                              actor=session.current.username)
     DB_CON.commit()
     return OK_CODE, "Room created"
 
 def set_room_clean_db(room_number, clean=True):
     """Mark the room as clean (or as needs cleaning when clean=False)"""
     DB_CURSER.execute("UPDATE rooms SET room_is_clean = %s WHERE room_number = %s", (clean, room_number))
+    if clean:  # only log the deliberate "Mark clean" action, not the automatic dirty-on-checkout side effect
+        activity_log.log_activity("room_marked_clean", f"Room {room_number} marked clean", actor=session.current.username)
     DB_CON.commit()
     return OK_CODE, f"Room {room_number} is {'clean' if clean else 'needs cleaning'}"
 
@@ -407,6 +421,8 @@ def set_room_name_db(room_number, name):
         if DB_CURSER.fetchone():
             return ERROR_CODE, f"Room name '{name}' is already used by another room"
     DB_CURSER.execute("UPDATE rooms SET room_name = %s WHERE room_number = %s", (name, room_number))
+    summary = f"Room {room_number} renamed to '{name}'" if name else f"Room {room_number}'s name was cleared"
+    activity_log.log_activity("room_renamed", summary, actor=session.current.username)
     DB_CON.commit()
     return OK_CODE, "Room name updated"
 
@@ -417,7 +433,7 @@ def set_room_name_db(room_number, name):
 def update_order_db(order_id: int = -1, customer_name: str = "", number_of_guests: int = 0,
                     breakfast: bool = False, lunch: bool = False, dinner: bool = False,
                     electric_car: bool = False, pet: bool = False, arrival_date: str = "", leaving_date: str = ""):
-    order = get_order_from_db_by_id(order_id)
+    order = get_order_from_db_by_id(order_id)[1]  # [1]: unwrap the (OK_CODE, order) pair to get the order itself
     exist_order = [order[i] for i in [0, 1, 2, 3, 4, 5, 6, 7, 8]]
     exist_arrival_date, exist_leaving_date = get_start_and_end_dates(order_id)
     exist_order.append(exist_arrival_date)
@@ -437,8 +453,9 @@ def update_order_db(order_id: int = -1, customer_name: str = "", number_of_guest
     update_q = "UPDATE orders SET customer_name=%s, number_of_guests =%s, room_number=%s, breakfast =%s, lunch =%s, dinner =%s, electric_car =%s, pet =%s where id=%s "
     params = (customer_name, number_of_guests, room_number, breakfast, lunch, dinner, electric_car, pet, order_id)
     DB_CURSER.execute(update_q, params)
-    create_log_order_room(ORDERS_LOGGER_LEVELS["order-update"]["value"],
-                          ORDERS_LOGGER_LEVELS["order-update"]["msg"] % order_id)  # create log for update the order
+    activity_log.log_activity("order_updated",
+                              f"Order #{str(order_id).zfill(8)} updated ({customer_name}, room {room_number}, "
+                              f"{arrival_date} → {leaving_date})", actor=session.current.username)
     DB_CON.commit()
     return UPDATE_ORDER_CODE, f"Update order {order_id} successfully "
 
@@ -506,10 +523,9 @@ def create_new_order_in_db(customer_name: str = None, guests: int = None, breakf
         order_id = create_order_in_db(order_info)
         # customer_name,number_of_guests,room_number, breakfast ,lunch ,dinner ,electric_car ,pet ,create_time ,create_by
         create_date_range_in_db(order_id, room, order_dates_range)  # create date-range for room and order
-        create_log_order_room(
-            ORDERS_LOGGER_LEVELS["new-order"]["value"],
-            ORDERS_LOGGER_LEVELS["new-order"]["msg"] % order_id,
-        )
+        activity_log.log_activity("order_created",
+                                  f"Order #{str(order_id).zfill(8)} created for {customer_name} ({guests} guests, "
+                                  f"room {room}, {arrival_date} → {leaving_date})", actor=session.current.username)
         return OK_CODE, f"Order created successfully - {order_id}"
     except KeyboardInterrupt:
         exit()

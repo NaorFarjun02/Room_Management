@@ -60,7 +60,7 @@ class Main_Page(QMainWindow):
 		loadUi("UI/UI_Files/main_page.ui", self)  # load the UI of the page
 		self.setWindowFlag(Qt.FramelessWindowHint)# this will hide the title bar (the app has its own header)
 		self.setWindowTitle("Room Manager")
-		self.want_relogin = False  # set by relogin() (Log out / auto-lock); main.py checks this after the window closes
+		self.want_relogin = False  # set to "logout"/"auto_lock" by relogin(); main.py checks this after the window closes
 		######################## add title widget ########################
 		self.title_bar=Title_Bar(self)
 		self.top_widget.addWidget(self.title_bar)
@@ -175,15 +175,15 @@ class Main_Page(QMainWindow):
 		self.add_room_btn.setVisible(session.current.is_manager())
 
 
-	def relogin(self):
+	def relogin(self, reason="logout"):
 		# close this window and tell main.py's loop to show the login screen again (used by Log out and auto-lock)
-		self.want_relogin = True
+		self.want_relogin = reason
 		self.close()
 
 
 	def lock_now(self):
 		# the app was idle for too long -> go back to the login screen
-		self.relogin()
+		self.relogin(reason="auto_lock")
 
 
 	def eventFilter(self, watched, event):

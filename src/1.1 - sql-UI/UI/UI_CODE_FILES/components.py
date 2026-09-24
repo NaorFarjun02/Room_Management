@@ -31,15 +31,19 @@ def table_row_layout(frame):
     return layout
 
 
-def table_header(titles, widths, trailing_width=0):
-    """The grey titles row on top of a table card"""
+def table_header(titles, widths, trailing_width=0, stretch_title=None):
+    """The grey titles row on top of a table card. With stretch_title, one more column is added
+    that grows to fill the remaining width (for a table whose last column is free text, not a fixed value)"""
     header = QFrame()
     header.setObjectName("table_header")
     header.setFixedHeight(46)
     layout = table_row_layout(header)
     for title, width in zip(titles, widths):
         layout.addWidget(cell(title, width))
-    layout.addStretch()
+    if stretch_title:
+        layout.addWidget(cell(stretch_title), 1)
+    else:
+        layout.addStretch()
     if trailing_width:
         layout.addSpacing(trailing_width)  # column of the buttons at the end of the rows
     return header

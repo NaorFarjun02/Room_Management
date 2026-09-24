@@ -17,8 +17,9 @@ def main():
 	app = QApplication(sys.argv)  # create the app
 	apply_theme(app)  # colors, fonts and the global stylesheet of the app
 
+	relogin_reason = "logout"  # unused on the first pass (nobody is logged in yet, so logout() logs nothing)
 	while True:
-		session.current.logout()  # start every login attempt with a clean session
+		session.current.logout(reason=relogin_reason)  # start every login attempt with a clean session
 		login_dialog = Login_Dialog()
 		if login_dialog.exec_() != QDialog.Accepted:
 			break  # the login window was closed -> quit the app
@@ -28,7 +29,7 @@ def main():
 		app.exec_()
 		if not main_page.want_relogin:
 			break  # the window was closed (not "Log out" / auto-lock) -> quit the app
-		# want_relogin -> loop back to the login screen without touching the DB connection
+		relogin_reason = main_page.want_relogin  # "logout" or "auto_lock" -> logged by the logout() call above, next loop
 
 if __name__ == '__main__':
 	main()

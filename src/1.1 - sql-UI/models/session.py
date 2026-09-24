@@ -5,6 +5,7 @@ Import the module and read through it - `from models import session` then `sessi
 never `from .session import current`, which would copy the reference at import time and go stale the
 moment someone logs in or out (the same trap the old CURRENT_USER constant had).
 """
+from . import activity_log
 
 
 class Session:
@@ -21,7 +22,13 @@ class Session:
         self.full_name = user["full_name"]
         self.role = user["role"]
 
-    def logout(self):
+    def logout(self, reason="logout"):
+        """reason: "logout" (the Log out button) or "auto_lock" (the idle timer) - logged either way"""
+        if self.is_logged_in():
+            summary = (f"{self.display_name()} signed out" if reason == "logout"
+                      else f"{self.display_name()} was auto-locked out after being idle")
+            activity_log.log_activity(reason if reason in ("logout", "auto_lock") else "logout", summary,
+                                      actor=self.username)
         self.__init__()
 
     def is_logged_in(self):

@@ -5,13 +5,16 @@ from PyQt5.QtWidgets import QWidget, QFrame, QPushButton
 from PyQt5.uic import loadUi
 
 from models import *
-from models import auth, session
+from models import auth, session, activity_log
 from UI import theme
 from .components import cell, pill_holder, table_header, table_row_layout, fixed_cell
 from .user_dialog import User_Dialog
 
 USERS_COLUMNS_TITLES = ["NAME", "USERNAME", "ROLE", "STATUS", "LAST LOGIN"]
 USERS_COLUMNS_WIDTH = [170, 130, 90, 100, 170]
+
+ACTIVITY_COLUMNS_TITLES = ["TIME", "TYPE", "ACTOR"]
+ACTIVITY_COLUMNS_WIDTH = [110, 160, 120]
 
 
 class Settings_Widget(QWidget):
@@ -39,7 +42,7 @@ class Settings_Widget(QWidget):
             self.add_user_btn.setIcon(theme.icon("plus", "#FFFFFF", 16))
             self.add_user_btn.setIconSize(QSize(16, 16))
             self.add_user_btn.clicked.connect(self.add_user)
-            self.activity_filter_input.textChanged.connect(self.refresh_activity)
+            self.setup_activity_log()
 
         self.display_account()
 
@@ -173,13 +176,66 @@ class Settings_Widget(QWidget):
         self.refresh_users()
 
     #################################### activity log (manager only) ####################################
+    def setup_activity_log(self):
+        self.activity_table_header_layout.addWidget(
+            table_header(ACTIVITY_COLUMNS_TITLES, ACTIVITY_COLUMNS_WIDTH, stretch_title="DETAILS"))
+        self.activity_search_input.textChanged.connect(self.refresh_activity)
+
+        self.activity_filter = "all"
+        self.activity_filter_buttons = {}
+        for key, label in activity_log.GROUPS.items():
+            btn = QPushButton(label, self)
+            btn.setProperty("variant", "chip")
+            btn.setCursor(Qt.PointingHandCursor)
+            btn.clicked.connect(lambda checked, k=key: self.set_activity_filter(k))
+            self.activity_filters_layout.addWidget(btn)
+            self.activity_filter_buttons[key] = btn
+        self.activity_filters_layout.addStretch()
+        self.mark_selected_activity_filter()
+
+    def set_activity_filter(self, filter_key):
+        self.activity_filter = filter_key if filter_key in activity_log.GROUPS else "all"
+        self.mark_selected_activity_filter()
+        self.refresh_activity()
+
+    def mark_selected_activity_filter(self):
+        for key, btn in self.activity_filter_buttons.items():
+            theme.set_selected(btn, key == self.activity_filter)
+
+    def clear_activity_table(self):
+        for i in reversed(range(self.activity_widget.count())):
+            self.activity_widget.itemAt(i).widget().setParent(None)
+
     def refresh_activity(self):
-        try:
-            lines = find_logger_by_number("1") or []
-        except Exception as e:
-            self.activity_log_view.setPlainText(f"Can't read the activity log: {e}")
-            return
-        needle = self.activity_filter_input.text().strip().lower()
-        if needle:
-            lines = [line for line in lines if needle in line.lower()]
-        self.activity_log_view.setPlainText("\n".join(reversed(lines[-500:])))
+        self.clear_activity_table()
+        counts = activity_log.count_by_group()
+        for key, btn in self.activity_filter_buttons.items():
+            btn.setText(f"{activity_log.GROUPS[key]}  {counts.get(key, 0)}")
+
+        rows = activity_log.get_activity_log(group=self.activity_filter, search=self.activity_search_input.text())
+        for row in rows:
+            self.activity_widget.addWidget(self.create_activity_row(row))
+        if len(rows) == 0:
+            empty_text = "No activity matches this search" if self.activity_search_input.text().strip() else "Nothing here yet"
+            empty_label = cell(empty_text, role="muted")
+            empty_label.setAlignment(Qt.AlignCenter)
+            empty_label.setMinimumHeight(100)
+            self.activity_widget.addWidget(empty_label)
+
+    def create_activity_row(self, row):
+        created_at, category, actor, summary = row
+        frame = QFrame(self)
+        frame.setProperty("row", "true")
+        frame.setMinimumHeight(52)
+        layout = table_row_layout(frame)
+        layout.setContentsMargins(24, 10, 16, 10)
+
+        layout.addWidget(cell(created_at.strftime("%d/%m  %H:%M"), ACTIVITY_COLUMNS_WIDTH[0]))
+        tone = activity_log.GROUP_TONE.get(activity_log.category_group(category), "neutral")
+        layout.addWidget(pill_holder(activity_log.category_label(category), tone, ACTIVITY_COLUMNS_WIDTH[1]))
+        layout.addWidget(cell(actor or "-", ACTIVITY_COLUMNS_WIDTH[2]))
+        summary_label = cell(summary)
+        summary_label.setWordWrap(True)
+        layout.addWidget(summary_label, 1)
+
+        return frame

@@ -775,9 +775,9 @@
              </spacer>
             </item>
             <item>
-             <widget class="QLineEdit" name="activity_filter_input">
+             <widget class="QLineEdit" name="activity_search_input">
               <property name="placeholderText">
-               <string>Filter (e.g. a room number or username)</string>
+               <string>Search (a name, an order, a room...)</string>
               </property>
               <property name="clearButtonEnabled">
                <bool>true</bool>
@@ -795,7 +795,7 @@
           <item>
            <widget class="QLabel" name="activity_hint_label">
             <property name="text">
-             <string>Most recent first - every order and room action, and who did it</string>
+             <string>Every sign-in, order, room and user change, most recent first - and who did it</string>
             </property>
             <property name="role" stdset="0">
              <string>muted</string>
@@ -813,35 +813,131 @@
             <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
+              <height>8</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="activity_filters_layout">
+            <property name="spacing">
+             <number>8</number>
+            </property>
+           </layout>
+          </item>
+          <item>
+           <spacer name="spacer_12">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
               <height>6</height>
              </size>
             </property>
            </spacer>
           </item>
           <item>
-           <widget class="QPlainTextEdit" name="activity_log_view">
-            <property name="readOnly">
-             <bool>true</bool>
+           <widget class="QFrame" name="activity_table_card">
+            <property name="card" stdset="0">
+             <string>true</string>
             </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>200</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>300</height>
-             </size>
-            </property>
+            <layout class="QVBoxLayout" name="activity_table_card_layout">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>1</number>
+             </property>
+             <property name="topMargin">
+              <number>1</number>
+             </property>
+             <property name="rightMargin">
+              <number>1</number>
+             </property>
+             <property name="bottomMargin">
+              <number>8</number>
+             </property>
+             <item>
+              <layout class="QVBoxLayout" name="activity_table_header_layout">
+               <property name="spacing">
+                <number>0</number>
+               </property>
+              </layout>
+             </item>
+             <item>
+              <widget class="QScrollArea" name="activity_scrollArea">
+               <property name="widgetResizable">
+                <bool>true</bool>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>200</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>360</height>
+                </size>
+               </property>
+               <property name="horizontalScrollBarPolicy">
+                <enum>Qt::ScrollBarAlwaysOff</enum>
+               </property>
+               <widget class="QWidget" name="scrollAreaWidgetContents_activity">
+                <layout class="QVBoxLayout" name="verticalLayout_activity">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <layout class="QVBoxLayout" name="activity_widget">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
+                  </layout>
+                 </item>
+                 <item>
+                  <spacer name="spacer_13">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </widget>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
          </layout>
         </widget>
        </item>
        <item>
-        <spacer name="spacer_12">
+        <spacer name="spacer_14">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>

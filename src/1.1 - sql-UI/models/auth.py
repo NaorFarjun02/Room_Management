@@ -14,6 +14,7 @@ import time
 
 from .global_ver import DB_CON, DB_CURSER, OK_CODE, ERROR_CODE
 from . import session
+from . import activity_log
 
 ROLES = ("manager", "desk")
 
@@ -157,6 +158,7 @@ def authenticate(username, password):
 
     _clear_failed_attempts(username)
     DB_CURSER.execute("UPDATE users SET last_login = now() WHERE id = %s", (user["id"],))
+    activity_log.log_activity("login", f"{user['full_name']} signed in as {user['role']}", actor=user["username"])
     DB_CON.commit()
     user["last_login"] = None  # stale value from before the update; callers that need it can re-fetch
     return OK_CODE, user
@@ -173,6 +175,8 @@ def change_own_password(current_password, new_password):
     if len(new_password) < MIN_PASSWORD_LENGTH:
         return ERROR_CODE, f"Password must be at least {MIN_PASSWORD_LENGTH} characters"
     DB_CURSER.execute("UPDATE users SET password_hash = %s WHERE id = %s", (hash_password(new_password), user["id"]))
+    activity_log.log_activity("password_changed", f"{user['full_name']} changed their password",
+                              actor=session.current.username)
     DB_CON.commit()
     return OK_CODE, "Password updated"
 
@@ -202,6 +206,8 @@ def create_first_manager(full_name, username, password):
         VALUES (%s, %s, 'manager', %s) RETURNING id, username, full_name, role, is_active, created_at, last_login""",
         (username.strip(), full_name.strip(), hash_password(password)))
     row = DB_CURSER.fetchone()
+    activity_log.log_activity("user_created", f"First manager account '{username.strip()}' created (initial setup)",
+                              actor=username.strip())
     DB_CON.commit()
     keys = ["id", "username", "full_name", "role", "is_active", "created_at", "last_login"]
     return OK_CODE, dict(zip(keys, row))
@@ -217,6 +223,8 @@ def create_user(full_name, username, role, password):
     DB_CURSER.execute("""INSERT INTO users (username, full_name, role, password_hash) VALUES (%s, %s, %s, %s)
         RETURNING id""", (username.strip(), full_name.strip(), role, hash_password(password)))
     user_id = DB_CURSER.fetchone()[0]
+    activity_log.log_activity("user_created", f"User '{username}' ({full_name}, {role}) created",
+                              actor=session.current.username)
     DB_CON.commit()
     return OK_CODE, f"User '{username}' created"
 
@@ -245,6 +253,9 @@ def update_user(user_id, full_name=None, username=None, role=None, password=None
     else:
         DB_CURSER.execute("UPDATE users SET full_name=%s, username=%s, role=%s WHERE id=%s",
                           (full_name.strip(), username.strip(), role, user_id))
+    activity_log.log_activity("user_updated",
+                              f"User '{username}' updated ({role}{', password reset' if password else ''})",
+                              actor=session.current.username)
     DB_CON.commit()
     if session.current.user_id == user_id:  # keep the session in sync if you edited your own account
         session.current.login({"id": user_id, "username": username.strip(), "full_name": full_name.strip(), "role": role})
@@ -264,5 +275,8 @@ def set_user_active(user_id, is_active):
         if user["role"] == "manager" and active_manager_count(exclude_id=user_id) == 0:
             return ERROR_CODE, "Can't disable the last manager"
     DB_CURSER.execute("UPDATE users SET is_active = %s WHERE id = %s", (is_active, user_id))
+    activity_log.log_activity("user_enabled" if is_active else "user_disabled",
+                              f"User '{user['username']}' {'enabled' if is_active else 'disabled'}",
+                              actor=session.current.username)
     DB_CON.commit()
     return OK_CODE, f"User '{user['username']}' {'enabled' if is_active else 'disabled'}"
