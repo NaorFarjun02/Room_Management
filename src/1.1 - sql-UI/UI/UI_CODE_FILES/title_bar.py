@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QFrame
 from PyQt5.uic import loadUi
 
 from models import *
+from models import session
 from UI import theme
 
 class Title_Bar(QFrame):
@@ -13,7 +14,8 @@ class Title_Bar(QFrame):
 		self.widget=widget  # the main window --> so I can close / minimize / move it
 		self.drag_position = None
 
-		self.user_chip.setText(f"Signed in as  {CURRENT_USER}")
+		role_label = "Manager" if session.current.is_manager() else "Desk"
+		self.user_chip.setText(f"{session.current.display_name()}  ·  {role_label}")
 		for btn, icon_name in [(self.minimize_button, "minimize"), (self.maximize_button, "maximize"),
 							   (self.close_button, "close")]:
 			btn.setIcon(theme.icon(icon_name, theme.COLORS["text_muted"], 18))

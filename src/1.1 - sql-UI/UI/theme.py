@@ -130,6 +130,12 @@ def set_selected(widget, status):
     repolish(widget)
 
 
+def set_role(label, role):
+    """Change a QLabel's role property after it was created (e.g. an error/success message label)"""
+    label.setProperty("role", role)
+    repolish(label)
+
+
 def repolish(widget):
     widget.style().unpolish(widget)
     widget.style().polish(widget)
@@ -288,6 +294,11 @@ QLabel[role="error"] {{
     font-size: 13px;
     font-weight: 600;
 }}
+QLabel[role="success"] {{
+    color: {success};
+    font-size: 13px;
+    font-weight: 600;
+}}
 
 /* ------------------------------------------------ cards ------------------------------------------------ */
 QFrame[card="true"] {{
@@ -396,6 +407,9 @@ QPushButton[variant="icon"] {{
 }}
 QPushButton[variant="icon"]:hover {{
     background: {danger_soft};
+}}
+QPushButton[variant="icon"][tone="neutral"]:hover {{
+    background: {surface_alt};
 }}
 QPushButton[variant="link"] {{
     background: transparent;

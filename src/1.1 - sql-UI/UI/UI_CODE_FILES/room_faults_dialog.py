@@ -8,13 +8,13 @@ from UI import theme
 
 
 class Faults_Dialog(QDialog):
-	def __init__(self, room_number,room_faults_list):
+	def __init__(self, room_number, room_faults_list, room_name=None):
 		"""init function that set al the main stuff of th page like UI and clicked event"""
 		super(Faults_Dialog, self).__init__()
 		loadUi("UI/UI_Files/room_faults_dialog.ui", self)  # load the UI of the page
 
 		self.room_number = room_number
-		self.room_number_label.setText(str(room_number))
+		self.room_number_label.setText(room_display_name(room_number, room_name))
 
 		for f in room_faults_list:
 			self.faults_widget.addWidget(self.create_fault_frame(f[0]))

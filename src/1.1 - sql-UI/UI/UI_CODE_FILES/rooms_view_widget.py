@@ -4,12 +4,14 @@ from PyQt5.QtWidgets import QWidget, QFrame, QPushButton, QHBoxLayout
 from PyQt5.uic import loadUi
 
 from models import *
+from models import session
 from models.dialogs.popup_msg import MSG_Popup
 from models.dialogs.dialog_msg import MSG_Dialog
 from .room_dates_catch_dialog import Dates_Catch_Dialog
 from .room_faults_dialog import Faults_Dialog
 from .new_room_dialog import New_Room_Dialog
 from .new_room_fault_dialog import New_Fault_Dialog
+from .rename_room_dialog import Rename_Room_Dialog
 from .components import cell, pill, pill_holder, table_header, table_row_layout, fixed_cell
 from UI import theme
 
@@ -17,7 +19,7 @@ COLUMNS_TITLES = ["ROOM", "CAPACITY", "STATUS", "CLEANING", "FAULTS", "BOOKED DA
 COLUMNS_WIDTH = [86, 82, 116, 272, 124, 122]  # room, capacity, status, cleaning, faults, dates
 
 # the filters of the rooms table: key -> (button text, function that says if a room is in the filter)
-# room = (room_number, room_capacity, occupied_now, room_is_clean, faults_count, overdue_order_id)
+# room = (room_number, room_capacity, occupied_now, room_is_clean, faults_count, overdue_order_id, room_name)
 ROOMS_FILTERS = {
     "all": ("All rooms", lambda room: True),
     "free": ("Available now", lambda room: not room[2]),
@@ -34,15 +36,18 @@ class Room_View_Widget(QWidget):
         loadUi("UI/UI_Files/rooms_view_widget.ui", self)  # load the UI of the page
         self.widget = widget  # the widget-stack that has all widgets --> so I can move to any other widget
         self.current_filter = "all"
+        self.is_manager = session.current.is_manager()
 
-        # the header stays on top while the rows scroll
-        self.table_header_layout.addWidget(table_header(COLUMNS_TITLES, COLUMNS_WIDTH, trailing_width=34))
+        # the header stays on top while the rows scroll (extra trailing space for the manager-only rename/delete icons)
+        self.table_header_layout.addWidget(table_header(COLUMNS_TITLES, COLUMNS_WIDTH,
+                                                         trailing_width=80 if self.is_manager else 0))
         self.new_room_btn.setIcon(theme.icon("plus", "#FFFFFF", 16))
         self.new_fault_btn.setIcon(theme.icon("wrench", theme.COLORS["text"], 16))
         self.home_btn.setIcon(theme.icon("arrow_left", theme.COLORS["text_muted"], 16))
         self.home_btn.clicked.connect(self.home)
         self.new_room_btn.clicked.connect(self.new_room)
         self.new_fault_btn.clicked.connect(self.new_fault)
+        self.new_room_btn.setVisible(self.is_manager)  # adding rooms is a manager-only action
 
         ############### filter buttons ###############
         self.filter_buttons = {}
@@ -82,7 +87,10 @@ class Room_View_Widget(QWidget):
         new_room_dialog.exec_()
         if new_room_dialog.capacity < 1 or new_room_dialog.capacity > 15:
             return False
-        create_room_in_db(new_room_dialog.capacity)
+        code, msg = create_room_in_db(new_room_dialog.capacity)
+        if code != OK_CODE:
+            MSG_Popup(msg).exec_()
+            return False
         self.refresh_rooms_status()
         return True
 
@@ -132,13 +140,13 @@ class Room_View_Widget(QWidget):
     def create_room_frame(self, room=None):
         if room is None:
             return None
-        # room = (room_number, room_capacity, occupied_now, room_is_clean, faults_count, overdue_order_id)
+        # room = (room_number, room_capacity, occupied_now, room_is_clean, faults_count, overdue_order_id, room_name)
         room_frame = QFrame(self)
         room_frame.setProperty("row", "true")
         room_frame.setFixedHeight(64)
         layout = table_row_layout(room_frame)
 
-        layout.addWidget(cell(f"Room {room[0]}", COLUMNS_WIDTH[0], "cell_strong"))
+        layout.addWidget(cell(room_display_name(room[0], room[6]), COLUMNS_WIDTH[0], "cell_strong"))
         layout.addWidget(cell(f"{room[1]} guests", COLUMNS_WIDTH[1]))
         if room[5]:
             # the guest should have left already but the order was not checked-out -> warning that opens the order
@@ -171,7 +179,7 @@ class Room_View_Widget(QWidget):
             faults_room.setIcon(theme.icon("check", theme.COLORS["success"], 16))
         faults_room.setIconSize(QSize(16, 16))
         faults_room.setObjectName("room_faults")
-        faults_room.clicked.connect(lambda: self.show_faults(room[0]))
+        faults_room.clicked.connect(lambda: self.show_faults(room[0], room[6]))
         layout.addWidget(fixed_cell(faults_room, COLUMNS_WIDTH[4]))
 
         dates_catch_room = QPushButton(" Bookings", room_frame)
@@ -180,19 +188,31 @@ class Room_View_Widget(QWidget):
         dates_catch_room.setIcon(theme.icon("calendar", theme.COLORS["accent"], 16))
         dates_catch_room.setIconSize(QSize(16, 16))
         dates_catch_room.setObjectName("room_dates_catch")
-        dates_catch_room.clicked.connect(lambda: self.show_dates_catch(room[0]))
+        dates_catch_room.clicked.connect(lambda: self.show_dates_catch(room[0], room[6]))
         layout.addWidget(fixed_cell(dates_catch_room, COLUMNS_WIDTH[5]))
 
         layout.addStretch()
-        delete_room_btn = QtWidgets.QPushButton(room_frame)
-        delete_room_btn.setProperty("variant", "icon")
-        delete_room_btn.setCursor(Qt.PointingHandCursor)
-        delete_room_btn.setToolTip(f"Delete room {room[0]}")
-        delete_room_btn.setIcon(theme.icon("trash", theme.COLORS["danger"], 18))
-        delete_room_btn.setIconSize(QSize(18, 18))
-        delete_room_btn.setObjectName("delete_room_btn")
-        delete_room_btn.clicked.connect(lambda: self.delete_room(room[0]))
-        layout.addWidget(delete_room_btn)
+        if self.is_manager:  # renaming and deleting rooms are manager-only actions
+            rename_room_btn = QtWidgets.QPushButton(room_frame)
+            rename_room_btn.setProperty("variant", "icon")
+            rename_room_btn.setProperty("tone", "neutral")
+            rename_room_btn.setCursor(Qt.PointingHandCursor)
+            rename_room_btn.setToolTip(f"Rename room {room[0]}")
+            rename_room_btn.setIcon(theme.icon("edit", theme.COLORS["text_muted"], 16))
+            rename_room_btn.setIconSize(QSize(16, 16))
+            rename_room_btn.setObjectName("rename_room_btn")
+            rename_room_btn.clicked.connect(lambda: self.rename_room(room[0], room[6]))
+            layout.addWidget(rename_room_btn)
+
+            delete_room_btn = QtWidgets.QPushButton(room_frame)
+            delete_room_btn.setProperty("variant", "icon")
+            delete_room_btn.setCursor(Qt.PointingHandCursor)
+            delete_room_btn.setToolTip(f"Delete room {room[0]}")
+            delete_room_btn.setIcon(theme.icon("trash", theme.COLORS["danger"], 18))
+            delete_room_btn.setIconSize(QSize(18, 18))
+            delete_room_btn.setObjectName("delete_room_btn")
+            delete_room_btn.clicked.connect(lambda: self.delete_room(room[0]))
+            layout.addWidget(delete_room_btn)
 
         return room_frame
 
@@ -238,21 +258,30 @@ class Room_View_Widget(QWidget):
             if len(room_dates) > 0:  # Check if the the room is not booked
                 MSG_Popup("The room is reserved for future bookings, you can't delete it").exec()
                 return
-            delete_room_db(room_number)
+            code, msg = delete_room_db(room_number)
+            if code != OK_CODE:
+                MSG_Popup(msg).exec_()
+                return
             self.refresh_rooms_status()
 
-    def show_dates_catch(self, room_number):
+    def rename_room(self, room_number, current_name):
+        dialog = Rename_Room_Dialog(room_number, current_name)
+        dialog.exec_()
+        if dialog.saved:
+            self.refresh_rooms_status()
+
+    def show_dates_catch(self, room_number, room_name=None):
         room_dates_catch_list = get_date_range_by_room_id_db(room_number=room_number)
         if len(room_dates_catch_list) > 0:
-            date_dialog = Dates_Catch_Dialog(room_number, room_dates_catch_list)
+            date_dialog = Dates_Catch_Dialog(room_number, room_dates_catch_list, room_name)
             date_dialog.exec()
         else:
             MSG_Popup("The room does not catch").exec_()
 
-    def show_faults(self, room_number):
+    def show_faults(self, room_number, room_name=None):
         room_faults_list = get_room_faults_from_db(room_number=room_number)
         if len(room_faults_list) > 0:
-            fault_dialog=Faults_Dialog(room_number,room_faults_list)
+            fault_dialog=Faults_Dialog(room_number,room_faults_list, room_name)
             fault_dialog.exec_()
             self.refresh_rooms_status()  # faults may have been marked as fixed
         else:

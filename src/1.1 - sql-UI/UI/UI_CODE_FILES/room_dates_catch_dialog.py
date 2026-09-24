@@ -9,14 +9,14 @@ from UI import theme
 
 
 class Dates_Catch_Dialog(QDialog):
-	def __init__(self, room_number,room_dates_catch_list):
+	def __init__(self, room_number, room_dates_catch_list, room_name=None):
 		"""init function that set al the main stuff of th page like UI and clicked event"""
 		super(Dates_Catch_Dialog, self).__init__()
-		loadUi("UI/UI_Files/room_dates_catch_dialog.ui", self)  # load the UI of the page	
+		loadUi("UI/UI_Files/room_dates_catch_dialog.ui", self)  # load the UI of the page
 
 
 
-		self.room_number_label.setText(str(room_number))
+		self.room_number_label.setText(room_display_name(room_number, room_name))
 
 		for d in room_dates_catch_list:
 			self.dates_catch_widget.addWidget(self.create_date_frame(d))

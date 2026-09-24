@@ -1,11 +1,12 @@
 import datetime
 import time
 
-from PyQt5.QtWidgets import QMainWindow, QSizeGrip
+from PyQt5.QtCore import Qt, QDateTime, QThread, pyqtSignal, QSize, QTimer, QEvent
+from PyQt5.QtWidgets import QMainWindow, QSizeGrip, QApplication
 from PyQt5.uic import loadUi
-from PyQt5.QtCore import Qt, QDateTime, QThread, pyqtSignal, QSize
 
 from models import *
+from models import session
 from UI import theme
 from .title_bar import Title_Bar
 from .home_menu_widget import Home_Menu_Widget
@@ -38,6 +39,8 @@ PAGES_HEADERS = {
 	windows_indexes["orders"]: ("Orders", "Every order in the hotel"),
 }
 
+AUTO_LOCK_MINUTES = 15  # return to the login screen after this many minutes with no mouse/keyboard activity
+
 # which sidebar button is marked for every page (order pages belong to "Orders")
 PAGES_NAV = {
 	windows_indexes["home-menu"]: "home",
@@ -57,6 +60,7 @@ class Main_Page(QMainWindow):
 		loadUi("UI/UI_Files/main_page.ui", self)  # load the UI of the page
 		self.setWindowFlag(Qt.FramelessWindowHint)# this will hide the title bar (the app has its own header)
 		self.setWindowTitle("Room Manager")
+		self.want_relogin = False  # set by relogin() (Log out / auto-lock); main.py checks this after the window closes
 		######################## add title widget ########################
 		self.title_bar=Title_Bar(self)
 		self.top_widget.addWidget(self.title_bar)
@@ -76,6 +80,7 @@ class Main_Page(QMainWindow):
 			"settings": self.setting_button,
 		}
 		self.setup_sidebar_icons()
+		self.apply_role_visibility()  # hide manager-only sidebar actions from a desk worker
 		##################################################################
 
 
@@ -117,6 +122,13 @@ class Main_Page(QMainWindow):
 		# self.time_date_thread=QThread(self,target=self.set_time_for_display)#create thread for time
 		# self.time_date_thread.start()#strat the thread time
 
+		############### auto-lock: back to the login screen after AUTO_LOCK_MINUTES idle ###############
+		self.idle_timer = QTimer(self)
+		self.idle_timer.setInterval(AUTO_LOCK_MINUTES * 60 * 1000)
+		self.idle_timer.timeout.connect(self.lock_now)
+		self.idle_timer.start()
+		QApplication.instance().installEventFilter(self)  # any click/key/scroll resets the idle timer
+
 
 	def setup_sidebar_icons(self):
 		sidebar_icons = [(self.nav_home_btn, "home"), (self.nav_orders_btn, "calendar"), (self.nav_rooms_btn, "bed"),
@@ -156,3 +168,30 @@ class Main_Page(QMainWindow):
 		time_text, date_text = time_date.split("\n")
 		self.time_and_date_label.setText(time_text)
 		self.date_label.setText(date_text)
+
+
+	def apply_role_visibility(self):
+		# a desk worker doesn't see manager-only sidebar actions (the DB layer refuses them too either way)
+		self.add_room_btn.setVisible(session.current.is_manager())
+
+
+	def relogin(self):
+		# close this window and tell main.py's loop to show the login screen again (used by Log out and auto-lock)
+		self.want_relogin = True
+		self.close()
+
+
+	def lock_now(self):
+		# the app was idle for too long -> go back to the login screen
+		self.relogin()
+
+
+	def eventFilter(self, watched, event):
+		if event.type() in (QEvent.MouseButtonPress, QEvent.KeyPress, QEvent.Wheel):
+			self.idle_timer.start()  # any activity resets the idle countdown
+		return super(Main_Page, self).eventFilter(watched, event)
+
+
+	def closeEvent(self, event):
+		QApplication.instance().removeEventFilter(self)  # this Main_Page is about to be destroyed
+		super(Main_Page, self).closeEvent(event)

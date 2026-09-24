@@ -3,6 +3,7 @@ from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.uic import loadUi
 
 from models import *
+from models import session
 from models.dialogs.dialog_msg import MSG_Dialog
 from PyQt5.QtCore import QSize
 from UI import theme
@@ -36,6 +37,8 @@ class View_Order_Widget(QWidget):
         self.leaving_date = ""  # leaving date of the order that is displayed (dd/mm/yyyy)
         self.overdue_icon.setPixmap(theme.pixmap("alert", theme.COLORS["danger"], 20))
         self.overdue_banner.setVisible(False)  # shown only when the order is overdue
+
+        self.delete_btn.setVisible(session.current.is_manager())  # deleting an order is a manager-only action
 
     def check_in_order(self):
         """

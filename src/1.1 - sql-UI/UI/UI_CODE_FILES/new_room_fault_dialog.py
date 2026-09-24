@@ -28,7 +28,8 @@ class New_Fault_Dialog(QDialog):
 			print(e)
 			rooms = []
 		for room in sorted(rooms, key=lambda r: r[0]):
-			self.room_number_input.addItem(f"Room {room[0]}  ·  {room[1]} guests", room[0])
+			# room = (room_number, room_capacity, room_is_catch, room_is_clean, room_name)
+			self.room_number_input.addItem(f"{room_display_name(room[0], room[4])}  ·  {room[1]} guests", room[0])
 		if len(rooms) == 0:
 			self.room_number_input.addItem("No rooms in the hotel yet")
 			self.room_number_input.setEnabled(False)

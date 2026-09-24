@@ -1,6 +1,8 @@
 import sqlite3
 import psycopg2
 
+from . import db_config
+
 OK_CODE = 111
 
 MULTI_ORDERS=112
@@ -17,13 +19,13 @@ VERABLE_ERROR_CODE = 502
 
 ERROR_CODE = 500
 
-DB_CON = psycopg2.connect(host='localhost', dbname="hotel_manegmant", user='postgres', password="159633",
-                          port=55555)
+_db_settings = db_config.get()
+DB_CON = psycopg2.connect(host=_db_settings["host"], dbname=_db_settings["dbname"], user=_db_settings["user"],
+                          password=_db_settings["password"], port=_db_settings["port"])
 DB_CURSER = DB_CON.cursor()
 
 
 stop_time_thread = False
-CURRENT_USER = "TEST-USER"
 
 windows_indexes = {
 

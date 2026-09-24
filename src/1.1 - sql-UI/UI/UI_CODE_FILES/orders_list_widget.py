@@ -7,7 +7,7 @@ from UI import theme
 from .components import cell, pill_holder, table_header, table_row_layout
 
 COLUMNS_TITLES = ["ORDER", "CUSTOMER", "GUESTS", "ROOM", "DATES", "STATUS"]
-COLUMNS_WIDTH = [110, 190, 80, 80, 220, 130]
+COLUMNS_WIDTH = [110, 180, 80, 150, 190, 130]  # ROOM is wider than just a number to fit a room's display name
 
 
 class Orders_List_Widget(QWidget):
@@ -69,7 +69,7 @@ class Orders_List_Widget(QWidget):
             self.orders_widget.addWidget(empty_label)
 
     def create_order_frame(self, order):
-        # order = (id, customer_name, number_of_guests, room_number, check_in, check_out, start_date, end_date)
+        # order = (id, customer_name, number_of_guests, room_number, check_in, check_out, start_date, end_date, room_name)
         order_frame = QFrame(self)
         order_frame.setProperty("row", "true")
         order_frame.setFixedHeight(60)
@@ -78,7 +78,7 @@ class Orders_List_Widget(QWidget):
         layout.addWidget(cell("#" + str(order[0]).zfill(8), COLUMNS_WIDTH[0], "cell_strong"))
         layout.addWidget(cell(order[1], COLUMNS_WIDTH[1]))
         layout.addWidget(cell(order[2], COLUMNS_WIDTH[2]))
-        layout.addWidget(cell(order[3], COLUMNS_WIDTH[3]))
+        layout.addWidget(cell(room_display_name(order[3], order[8]), COLUMNS_WIDTH[3]))
         dates = f"{order[6]}  →  {order[7]}" if order[6] else "-"
         layout.addWidget(cell(dates, COLUMNS_WIDTH[4]))
         if order[5]:
